@@ -15,6 +15,34 @@ export const getAllUtilisateurs = async (req, res) => {
   }
 };
 
+// Récupérer tous les Etudiants
+export const getAllEtudiants = async (req, res) => {
+    try {
+      const Etudiants = await sql`
+        SELECT id, nom, prenom, email, role, created_at, "INE"
+        FROM utilisateur
+        where role='Etudiant'
+      `;
+      res.status(200).json(Etudiants);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+  // Récupérer tous les Professeurs
+export const getAllProfesseurs = async (req, res) => {
+    try {
+      const Professeurs = await sql`
+        SELECT id, nom, prenom, email, role, created_at, "INE"
+        FROM utilisateur
+        where role='Professeur'
+      `;
+      res.status(200).json(Professeurs);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
 // Récupérer un utilisateur par ID
 export const getUtilisateurById = async (req, res) => {
   try {
