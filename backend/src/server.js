@@ -3,6 +3,11 @@ import dotenv from 'dotenv';
 import express from 'express';
 import sql from './config/db.js';
 import utilisateurRoutes from './routes/utilisateurRoutes.js';
+import sujetRoutes from './routes/sujetRoutes.js';
+import bcrypt from "bcrypt";
+
+
+
 
 dotenv.config();
 const app = express();
@@ -30,6 +35,8 @@ app.get('/', (req, res) => {
 // Utilisation des routes API
 app.use('/api/utilisateurs', utilisateurRoutes);
 
+app.use('/api/sujets',sujetRoutes);
+
 // Gestion des routes inexistantes
 app.use('*', (req, res) => {
   res.status(404).json({ message: "Route introuvable" });
@@ -39,3 +46,21 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
 });
+
+
+
+
+/*
+
+const app = express();
+app.use(express.json());
+
+// Routes API
+app.use("/api/sujets", sujetRoutes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`✅ Serveur démarré sur le port ${PORT}`);
+});
+
+*/
