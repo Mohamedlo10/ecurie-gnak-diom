@@ -15,6 +15,6 @@ router.get('/', getAllClasses);
 router.get('/:id', getClasseById);  
 router.put('/:id', updateClasse);  
 router.delete('/:id', deleteClasse);  
-router.get('/Utilisateur/:idUtilisateur', getClasseByIdProfesseur);  
+router.get('/:idprofesseur', getClasseByIdProfesseur);  
 
 export default router;

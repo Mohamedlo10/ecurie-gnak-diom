@@ -43,13 +43,13 @@ export const getClasseById = async (req, res) => {
 
 
 export const getClasseByIdProfesseur = async (req, res) => {
-    const { idUtilisateur, role } = req.params;
+    const { idUtilisateur} = req.params;
     try {
-        const result = await sql`SELECT * FROM classe WHERE idprofesseur = ${idUtilisateur} and role=${role}`;
+        const result = await sql`SELECT * FROM classe WHERE idprofesseur = ${idUtilisateur}`;
         if (result.length === 0) {
             return res.status(404).json({ message: 'ki diangaleih wull dh' });
         }
-        res.status(200).json(result);
+        res.status(200).json(result[0]);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Problème amna nk ' });

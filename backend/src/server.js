@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import sql from './config/db.js';
 import utilisateurRoutes from './routes/utilisateurRoutes.js';
+import classeRoutes from './routes/classeRoutes.js';
+import sujetRoutes from './routes/sujetRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -29,6 +31,8 @@ app.get('/', (req, res) => {
 
 // Utilisation des routes API
 app.use('/api/utilisateurs', utilisateurRoutes);
+app.use('/api/classe', classeRoutes);
+app.use('/api/sujet', sujetRoutes);
 
 // Gestion des routes inexistantes
 app.use('*', (req, res) => {

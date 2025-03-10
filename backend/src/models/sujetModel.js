@@ -54,7 +54,6 @@ const SujetModel = {
         if (error) throw error;
         return data;
     }
-   
     
 };
 
