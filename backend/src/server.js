@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import sql from './config/db.js';
 import utilisateurRoutes from './routes/utilisateurRoutes.js';
-import classeRoutes from './routes/classeRoutes.js';
+import classeRoutes from './routes/coursRoutes.js';
 import sujetRoutes from './routes/sujetRoutes.js';
 
 dotenv.config();
