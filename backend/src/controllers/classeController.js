@@ -1,12 +1,12 @@
-import sql from '../config/db.js';  // Importation de la connexion à la base de données
+import sql from '../config/db.js'; // Importation de la connexion à la base de données
 
 // Création d'une nouvelle classe
 export const createClasse = async (req, res) => {
     const { nom, idprofesseur } = req.body;
     try {
         await sql`
-        INSERT INTO classe (nom, idprofesseur, created_at, updated_dat) 
-        VALUES (${nom}, ${idprofesseur}, NOW(), NOW())
+        INSERT INTO classe (nom, idprofesseur) 
+        VALUES (${nom}, ${idprofesseur})
         `;
         res.status(201).json({ message: 'Classe créée avec succès' });
     } catch (error) {
