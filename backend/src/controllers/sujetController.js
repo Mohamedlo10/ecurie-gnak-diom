@@ -54,4 +54,4 @@ export const getAllSujets = async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Erreur lors de la récupération des sujets' });
   }
-};
+}; 

@@ -17,4 +17,4 @@ router.post('/evaluate', evaluateCopie);
 router.put('/:id', updateCopie); 
 router.delete('/:id', deleteCopie); 
 
-export default router;
+export default router; 

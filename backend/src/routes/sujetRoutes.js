@@ -14,4 +14,4 @@ router.post('/', createSujet);
 // router.put('/:id', updateSujet); 
 // router.delete('/:id', deleteSujet); 
 
-export default router;
+export default router; 

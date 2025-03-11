@@ -51,7 +51,7 @@ export const generateCorrection = async (req, res) => {
     const correctionText = openRouterResponse.data.choices[0].message.content;
     console.log(correctionText)
 /* 
-    // Créer un PDF à partir du texte de correction
+    // Créer un PDF à partir du texte de correction 
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage();
     const { width, height } = page.getSize();

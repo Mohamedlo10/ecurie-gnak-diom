@@ -14,4 +14,4 @@ router.post('/', generateCorrection);
 // router.put('/:id', updateCorrection); 
 // router.delete('/:id', deleteCorrection); 
 
-export default router;
+export default router; 

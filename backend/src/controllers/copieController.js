@@ -6,7 +6,7 @@ import sql from '../config/db.js';
 export const submitCopie = async (req, res) => {
   const { idsujet, idetudiant, urlCopie } = req.body;
 
-  try {
+  try { 
     // Extraire le texte du PDF
     const response = await axios.get(urlCopie, { responseType: 'arraybuffer' });
     const data = await pdf(response.data);
