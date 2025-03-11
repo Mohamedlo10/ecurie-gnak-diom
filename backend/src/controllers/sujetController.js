@@ -1,46 +1,57 @@
-import SujetModel from "../models/sujetModel.js";
+import axios from 'axios';
+import sql from '../config/db.js';
 
+// Créer un sujet
+export const createSujet = async (req, res) => {
+  const { nom, idCours, urlSujet } = req.body;
 
-export const getAllSujetsByClasse = async (req, res) => {
-    try {
-        const sujets = await SujetModel.getAllByClasse(req.params.idclasse);
-        res.status(200).json(sujets);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-export const getOneSujetByClasse = async (req, res) => {
-    try {
-        const { idclasse, id } = req.params;
-        const sujet = await SujetModel.getOneByClasse(idclasse, id);
-        if (!sujet) return res.status(404).json({ message: "Sujet non trouvé pour cette classe" });
-        res.status(200).json(sujet);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+  try {
+    // Extraire le texte du PDF
+    const response = await axios.get(urlSujet, { responseType: 'arraybuffer' });
 
+    // Insérer le sujet dans la base de données
+    const result = await sql`
+      INSERT INTO sujet (nom, "idCours", urlsujet)
+      VALUES (${nom}, ${idCours}, ${urlSujet})
+      RETURNING *
+    `;
 
-export const createSujetForClasse = async (req, res) => {
-    try {
-        const { nom, urlsujet, date_soumission } = req.body;
-        const newSujet = await SujetModel.createForClasse(req.params.idclasse, {
-            nom,
-            urlsujet,
-            date_soumission
-        });
-        res.status(201).json(newSujet);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.status(201).json(result[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lors de la création du sujet' });
+  }
 };
 
+// Récupérer un sujet par son ID
+export const getSujetById = async (req, res) => {
+  const { id } = req.params;
 
-export const deleteSujetsByClasse = async (req, res) => {
-    try {
-        const message = await SujetModel.deleteByClasse(req.params.idclasse);
-        res.status(200).json(message);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+  try {
+    const result = await sql`
+      SELECT * FROM sujet WHERE id = ${id}
+    `;
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'Sujet non trouvé' });
     }
+
+    res.status(200).json(result[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lors de la récupération du sujet' });
+  }
+};
+
+// Lister tous les sujets
+export const getAllSujets = async (req, res) => {
+  try {
+    const result = await sql`
+      SELECT * FROM sujet
+    `;
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lors de la récupération des sujets' });
+  }
 };

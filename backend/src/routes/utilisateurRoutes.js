@@ -2,8 +2,8 @@ import express from 'express';
 import {
     createUtilisateur,
     deleteUtilisateur,
-    getAllEtudiants,
-    getAllProfesseurs,
+    // getAllEtudiants,
+    // getAllProfesseurs,
     getAllUtilisateurs,
     getUtilisateurById,
     loginUtilisateur,
@@ -14,8 +14,8 @@ const router = express.Router();
 
 // Routes CRUD pour les utilisateurs
 router.get('/', getAllUtilisateurs);
-router.get('/etudiants', getAllEtudiants);
-router.get('/professeurs', getAllProfesseurs);
+// router.get('/etudiants', getAllEtudiants);
+// router.get('/professeurs', getAllProfesseurs);
 router.get('/:id', getUtilisateurById);
 router.post('/', createUtilisateur);
 router.put('/:id', updateUtilisateur);
