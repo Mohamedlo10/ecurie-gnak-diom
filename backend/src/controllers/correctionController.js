@@ -56,7 +56,7 @@ export const generateCorrection = async (req, res) => {
     const page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     page.drawText(correctionText, {
-      x: 50,
+      x: 50, 
       y: height - 50,
       size: 12,
     });
