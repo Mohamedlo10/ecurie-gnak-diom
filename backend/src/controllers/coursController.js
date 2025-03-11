@@ -1,94 +1,48 @@
-import sql from '../config/db.js'; // Importation de la connexion à la base de données
+import CoursModel from "../models/coursModel.js";
 
-// Création d'une nouvelle classe
-export const createClasse = async (req, res) => {
-    const { nom, idprofesseur } = req.body;
+export const createCours = async (req, res) => {
     try {
-        await sql`
-        INSERT INTO classe (nom, idprofesseur) 
-        VALUES (${nom}, ${idprofesseur})
-        `;
-        res.status(201).json({ message: 'Classe créée avec succès' });
+        const { nomcours, idutilisateur } = req.body;
+        const cours = await CoursModel.createCours({ nomcours, idutilisateur });
+        res.status(201).json({ message: "Cours ajouté avec succès", data: cours });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Erreur lors de la création de la classe' });
+        res.status(500).json({ error: error.message });
     }
 };
 
-// Récupérer toutes les classes
-export const getAllClasses = async (req, res) => {
+export const getAllCours = async (req, res) => {
     try {
-        const result = await sql`SELECT * FROM classe`;
-        res.status(200).json(result);
+        const cours = await CoursModel.getAllCours();
+        res.status(200).json(cours);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Erreur lors de la récupération des classes' });
+        res.status(500).json({ error: error.message });
     }
 };
 
-// Récupérer une classe par son ID
-export const getClasseById = async (req, res) => {
-    const { id } = req.params;
+export const getCoursById = async (req, res) => {
     try {
-    const result = await sql`SELECT * FROM classe WHERE id = ${id}`;
-    if (result.length === 0) {
-        return res.status(404).json({ message: 'Classe non trouvée' });
-    }
-    res.status(200).json(result[0]);
+        const cours = await CoursModel.getCoursById(req.params.id);
+        if (!cours) return res.status(404).json({ message: "Cours non trouvé" });
+        res.status(200).json(cours);
     } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur lors de la récupération de la classe' });
+        res.status(500).json({ error: error.message });
     }
 };
 
-
-export const getClasseByIdProfesseur = async (req, res) => {
-    const { idUtilisateur} = req.params;
+export const updateCours = async (req, res) => {
     try {
-        const result = await sql`SELECT * FROM classe WHERE idprofesseur = ${idUtilisateur}`;
-        if (result.length === 0) {
-            return res.status(404).json({ message: 'ki diangaleih wull dh' });
-        }
-        res.status(200).json(result[0]);
+        const updatedCours = await CoursModel.updateCours(req.params.id, req.body);
+        res.status(200).json(updatedCours);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Problème amna nk ' });
+        res.status(500).json({ error: error.message });
     }
 };
 
-
-// Mettre à jour une classe
-export const updateClasse = async (req, res) => {
-    const { id } = req.params;
-    const { nom, idprofesseur } = req.body;
+export const deleteCours = async (req, res) => {
     try {
-        const result = await sql`UPDATE classe SET nom = ${nom}, idprofesseur = ${idprofesseur}, updated_dat = NOW() WHERE id = ${id}`;
-        if (result.count === 0) {
-            return res.status(404).json({ message: 'Classe non trouvée' });
-        }
-        res.status(200).json({ message: 'Classe à jour  nice' });
+        const result = await CoursModel.deleteCours(req.params.id);
+        res.status(200).json({ message: "Cours supprimé avec succès", data: result });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'sé anillerrr dou am' });
+        res.status(500).json({ error: error.message });
     }
 };
-
-// Supprimer une classe
-export const deleteClasse = async (req, res) => {
-    const { id } = req.params;
-    try {
-        // Effectuer la suppression
-        const result = await sql`DELETE FROM classe WHERE id = ${id}`;
-        
-        // Vérifiez si des lignes ont été supprimées
-        if (result.count === 0 || result.rowCount === 0) {
-            return res.status(404).json({ message: 'Classe non trouvée' });
-        }
-
-        res.status(200).json({ message: 'Classe supprimée avec succès' });
-    } catch (error) {
-        console.error("Erreur de suppression:", error);  // Affichez l'erreur pour faciliter le débogage
-        res.status(500).json({ message: 'Erreur lors de la suppression de la classe' });
-    }
-};
-
