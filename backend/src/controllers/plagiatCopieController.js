@@ -1,5 +1,6 @@
 import PlagiatCopieModel from "../models/plagiatcopieModel.js";
 
+
 export const createPlagiatCopie = async (req, res) => {
     try {
         const { idplagiat, idcopie, pourcentageplagiat } = req.body;
