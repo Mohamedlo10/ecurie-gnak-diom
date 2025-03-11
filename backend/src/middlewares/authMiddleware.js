@@ -5,7 +5,7 @@ export const protect = async (req, res, next) => {
   try {
     let token;
     
-    // Vérifier si le token existe dans les headers
+  
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
@@ -16,21 +16,22 @@ export const protect = async (req, res, next) => {
     
     // Vérifier le token
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, '2b744e2124e26c396be56e55d472990e79ba744c4f196160adcc1b35488b16c1a7bed28a14118a9997ad8b0744e3a565895249417a6d08378d1f74f704e2a441');  // fii woroul dara apres ma deff ko ci ci .env
+
+      // Vérifier si l'utilisateur existe dans la base de données
+      const { data: users, error } = await supabase
+        .from("utilisateur")
+        .select("id, nom, prenom, email, role, INE")
+        .eq("id", decoded.id)
+        .single();
       
-      // Récupérer l'utilisateur sans le mot de passe
-      const users = await sql`
-        SELECT id, nom, prenom, email, role, "INE"
-        FROM utilisateur
-        WHERE id = ${decoded.id}
-      `;
-      
-      if (users.length === 0) {
-        return res.status(401).json({ message: 'Utilisateur non trouvé' });
+      if (error || !users) {
+        return res.status(401).json({ message: 'Utilisateur non trouvé ou token invalide' });
       }
       
-      req.user = users[0];
-      next();
+      // Attacher l'utilisateur dans req.user
+      req.user = users;
+      next();  // Passe à la prochaine étape du middleware ou de la route
     } catch (error) {
       return res.status(401).json({ message: 'Non autorisé, token invalide' });
     }
