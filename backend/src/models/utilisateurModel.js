@@ -1,66 +1,79 @@
-import sql from "../config/db.js";
+import sql from '../config/db.js'; 
 
-const UtilisateurModel = {
-    async createUtilisateur({ nom, prenom, email, motdepasse }) {
-        const { data, error } = await sql
-            .from("utilisateur")
-            .insert([{ nom, prenom, email, motdepasse }]);
+  
+// Fonction pour vérifier si un utilisateur existe déjà par email
+export const findUserByEmail = async (email) => {
+    try {
+        // Construire la requête SQL avec les paramètres
+        const query = sql`
+            SELECT idutilisateur, nom, prenom, email, motdepasse
+            FROM utilisateur
+            WHERE email = ${email}  
+            LIMIT 1
+        `;
 
-        if (error) throw error;
-        return data;
-    },
+        // Exécuter la requête et obtenir les résultats
+        const result = await query;  // Ici, 'query' est déjà une fonction qui exécute la requête.
 
-    async getAllUtilisateurs() {
-        const { data, error } = await sql.from("utilisateur").select("*");
-        if (error) throw error;
-        return data;
-    },
-
-    async getUtilisateurById(id) {
-        const { data, error } = await sql
-            .from("utilisateur")
-            .select("*")
-            .eq("idutilisateur", id)
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    async updateUtilisateur(id, updateData) {
-        const { data, error } = await sql
-            .from("utilisateur")
-            .update(updateData)
-            .eq("idutilisateur", id);
-        if (error) throw error;
-        return data;
-    },
-
-    async deleteUtilisateur(id) {
-        const { data, error } = await sql
-            .from("utilisateur")
-            .delete()
-            .eq("idutilisateur", id);
-        if (error) throw error;
-        return data;
-    },
-    async loginUtilisateur({email,mot_de_passe}) {
-        const {data,error} =await sql
-        .from("utilisateur")
-        .select("*")
-        .eq("email",email)
-        .single();
-        if (error) throw error;
-
-        const utilisateur = data;
-        const isMatch = await bcrypt.compare(motdepasse, utilisateur.mot_de_passe);
-        
-        if (!isMatch) {
-            throw new Error("Identifiants invalides");
+        // Vérifie si des utilisateurs ont été trouvés
+        if (result.length === 0) {
+            throw new Error('Utilisateur non trouvé');
         }
-        delete utilisateur.mot_de_passe;
-        return utilisateur;
-    }
-}; 
 
-export default UtilisateurModel;
- 
+        // Retourne le premier utilisateur trouvé
+        return result[0];  // Si trouvé, retourne l'utilisateur
+    } catch (error) {
+        // Gestion des erreurs
+        throw new Error(error.message);
+    }
+};
+// Fonction pour créer un nouvel utilisateur
+export const createUser = async (nom, prenom, email, motdepasse) => {
+    // Requête SQL pour insérer un nouvel utilisateur
+    const query = sql`
+        INSERT INTO utilisateur (nom, prenom, email, motdepasse)
+        VALUES (${nom}, ${prenom}, ${email}, ${motdepasse})
+        RETURNING idutilisateur, nom, prenom, email
+    `;
+
+    try {
+        // Exécution de la requête SQL
+        const { rows } = await query;  // L'utilisation de "await" ici permet d'attendre que la requête soit exécutée
+
+        // Si l'utilisateur a été inséré, retourne les données de l'utilisateur
+        return rows[0];  // Retourne le premier utilisateur inséré
+    } catch (error) {
+        throw new Error('Erreur lors de la création de l\'utilisateur');
+    }
+};
+
+
+// Fonction pour trouver un utilisateur par ID
+export const findUserById = async (idutilisateur) => {
+    // Requête SQL pour récupérer un utilisateur par son ID
+    const query = sql`
+        SELECT *
+        FROM utilisateur
+        WHERE idutilisateur = ${idutilisateur}
+        LIMIT 1
+    `;
+
+    try {
+        // Exécution de la requête SQL
+        const { rows } = await query;  // Exécution de la requête avec "await"
+
+        if (rows.length === 0) {
+            throw new Error('Utilisateur non trouvé');
+        }
+
+        // Retourne le premier utilisateur trouvé
+        return rows[0];  // Renvoie l'utilisateur trouvé
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
+
+
+
+
+
