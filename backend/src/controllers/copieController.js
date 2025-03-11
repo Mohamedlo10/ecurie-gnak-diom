@@ -79,6 +79,8 @@ export const evaluateCopie = async (req, res) => {
       prompt: `Évalue la copie suivante par rapport au corrigé type :\n\nCorrigé : ${correctionText}\n\nCopie : ${copieText}`,
     });
 
+
+    
     // Mettre à jour la copie avec la note et le commentaire
     const noteIa = parseFloat(evaluation.data.note);
     const commentaire = evaluation.data.commentaire;
