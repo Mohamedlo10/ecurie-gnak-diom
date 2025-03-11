@@ -2,9 +2,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import sql from './config/db.js';
-import utilisateurRoutes from './routes/utilisateurRoutes.js';
+import correctionRoutes from './routes/correctionRoutes.js';
 import classeRoutes from './routes/coursRoutes.js';
 import sujetRoutes from './routes/sujetRoutes.js';
+import utilisateurRoutes from './routes/utilisateurRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -33,6 +34,8 @@ app.get('/', (req, res) => {
 app.use('/api/utilisateurs', utilisateurRoutes);
 app.use('/api/classe', classeRoutes);
 app.use('/api/sujet', sujetRoutes);
+app.use('/api/correction', correctionRoutes);
+
 
 // Gestion des routes inexistantes
 app.use('*', (req, res) => {
