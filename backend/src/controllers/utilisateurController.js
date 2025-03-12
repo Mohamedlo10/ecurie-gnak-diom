@@ -24,7 +24,7 @@ export const registerUtilisateur = async (req, res) => {
 
         // En fonction du rôle, insérer dans `etudiant` ou `professeur`
         if (role === 'etudiant') {
-            await etudiantModel.createEtudiant(newUser.idutilisateur);
+            await etudiantModel.createEtudiant(newUser.idutilisateur, ine);
         } else if (role === 'professeur') {
             await professeurModel.createProfesseur(newUser.idutilisateur);
         }
@@ -36,7 +36,6 @@ export const registerUtilisateur = async (req, res) => {
     }
 };
 
-// Connexion d'un utilisateur
 export const loginUtilisateur = async (req, res) => {
     try {
         const { email, motdepasse } = req.body;
@@ -44,13 +43,13 @@ export const loginUtilisateur = async (req, res) => {
         // Vérifier si l'utilisateur existe
         const utilisateur = await utilisateurModel.findUserByEmail(email);
         if (!utilisateur) {
-            return res.status(400).json({ message: 'Identifiants invalides' });
+            return res.status(400).json({ message: 'login invalides ' });
         }
 
-        // Vérifier le mot de passe
-        const isMatch = await bcrypt.compare(motdepasse, utilisateur.motdepasse);
+        // Vérifier le mot de passe avec bcrypt
+        const isMatch = await (motdepasse == utilisateur.motdepasse);
         if (!isMatch) {
-            return res.status(400).json({ message: 'Identifiants invalides' });
+            return res.status(400).json({ message: 'mdp invalides' });
         }
 
         // Vérifier si c'est un étudiant ou un professeur
@@ -95,7 +94,7 @@ export const loginUtilisateur = async (req, res) => {
 
 export const getAllUtilisateurs = async (req, res) => {
     try {
-        const utilisateurs = await UtilisateurModel.getAllUtilisateurs();
+        const utilisateurs = await utilisateurModel.getAllUtilisateurs();
         res.status(200).json(utilisateurs);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -104,7 +103,7 @@ export const getAllUtilisateurs = async (req, res) => {
 
 export const getUtilisateurById = async (req, res) => {
     try {
-        const utilisateur = await UtilisateurModel.getUtilisateurById(req.params.id);
+        const utilisateur = await utilisateurModel.getUtilisateurById(req.params.id);
         if (!utilisateur) return res.status(404).json({ message: "Utilisateur non trouvé" });
         res.status(200).json(utilisateur);
     } catch (error) {
@@ -114,7 +113,7 @@ export const getUtilisateurById = async (req, res) => {
 
 export const updateUtilisateur = async (req, res) => {
     try {
-        const updatedUtilisateur = await UtilisateurModel.updateUtilisateur(req.params.id, req.body);
+        const updatedUtilisateur = await utilisateurModel.updateUtilisateur(req.params.id, req.body);
         res.status(200).json(updatedUtilisateur);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -123,7 +122,7 @@ export const updateUtilisateur = async (req, res) => {
 
 export const deleteUtilisateur = async (req, res) => {
     try {
-        const result = await UtilisateurModel.deleteUtilisateur(req.params.id);
+        const result = await utilisateurModel.deleteUtilisateur(req.params.id);
         res.status(200).json({ message: "Utilisateur supprimé avec succès", data: result });
     } catch (error) {
         res.status(500).json({ error: error.message });

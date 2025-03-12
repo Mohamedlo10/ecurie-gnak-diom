@@ -1,17 +1,15 @@
 import sql from '../config/db.js';
 
 export const createProfesseur = async (idutilisateur) => {
-    const query = sql`
+    try {
+    const query = await sql`
         INSERT INTO professeur (idutilisateur)
         VALUES (${idutilisateur})
         RETURNING *
-    `;
-
-    try {
-        const { rows } = await query;  // L'utilisation de "await" exécute la requête SQL
-        return rows[0]; // Retourne l'étudiant inséré
+    `;  // L'utilisation de "await" exécute la requête SQL
+        return query[0]; // Retourne l'étudiant inséré
     } catch (error) {
-        throw new Error('Erreur lors de l\'inscription de l\'étudiant');
+        throw new Error('Erreur lors de l\'inscription de professeur');
     }
 };
 

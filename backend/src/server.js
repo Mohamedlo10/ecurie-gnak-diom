@@ -2,6 +2,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import sql from './config/db.js';
+import PdfParse from 'pdf-parse';
 import correctionRoutes from './routes/correctionRoutes.js';
 import classeRoutes from './routes/coursRoutes.js';
 import sujetRoutes from './routes/sujetRoutes.js';

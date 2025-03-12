@@ -1,5 +1,6 @@
 import axios from 'axios';
 import sql from '../config/db.js';
+import pdf from 'pdf-parse';
 
 
 // Générer une correction pour un sujet

@@ -1,4 +1,4 @@
-import ProfesseurModel from "../models/professeurModel.js";
+import * as ProfesseurModel from "../models/professeurModel.js";
 
 export const createProfesseur = async (req, res) => {
     try {

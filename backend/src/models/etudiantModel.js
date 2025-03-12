@@ -1,16 +1,14 @@
 import sql from '../config/db.js';
 
 // Fonction pour insérer un étudiant
-export const createEtudiant = async (idutilisateur) => {
-    const query = sql`
-        INSERT INTO etudiant (idutilisateur)
-        VALUES (${idutilisateur})
-        RETURNING *
-    `;
-
+export const createEtudiant = async (idutilisateur, ine) => {
     try {
-        const { rows } = await query;  // L'utilisation de "await" exécute la requête SQL
-        return rows[0]; // Retourne l'étudiant inséré
+    const query = await sql`
+        INSERT INTO etudiant (idutilisateur, ine)
+        VALUES (${idutilisateur}, ${ine})
+        RETURNING *
+    `;  // L'utilisation de "await" exécute la requête SQL
+        return query[0]; // Retourne l'étudiant inséré
     } catch (error) {
         throw new Error('Erreur lors de l\'inscription de l\'étudiant');
     }

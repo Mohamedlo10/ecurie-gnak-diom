@@ -16,9 +16,9 @@ export const findUserByEmail = async (email) => {
         const result = await query;  // Ici, 'query' est déjà une fonction qui exécute la requête.
 
         // Vérifie si des utilisateurs ont été trouvés
-        if (result.length === 0) {
-            throw new Error('Utilisateur non trouvé');
-        }
+        // if (result.length === 0) {
+        //     throw new Error('Utilisateur non trouvé');
+        // }
 
         // Retourne le premier utilisateur trouvé
         return result[0];  // Si trouvé, retourne l'utilisateur
@@ -27,25 +27,50 @@ export const findUserByEmail = async (email) => {
         throw new Error(error.message);
     }
 };
-// Fonction pour créer un nouvel utilisateur
-export const createUser = async (nom, prenom, email, motdepasse) => {
-    // Requête SQL pour insérer un nouvel utilisateur
-    const query = sql`
-        INSERT INTO utilisateur (nom, prenom, email, motdepasse)
-        VALUES (${nom}, ${prenom}, ${email}, ${motdepasse})
-        RETURNING idutilisateur, nom, prenom, email
-    `;
-
+export const getAllUtilisateurs = async () => {
     try {
-        // Exécution de la requête SQL
-        const { rows } = await query;  // L'utilisation de "await" ici permet d'attendre que la requête soit exécutée
+        // Construire la requête SQL avec les paramètres
+        const query = sql`
+            SELECT idutilisateur, nom, prenom, email, motdepasse
+            FROM utilisateur`;
 
-        // Si l'utilisateur a été inséré, retourne les données de l'utilisateur
-        return rows[0];  // Retourne le premier utilisateur inséré
+        // Exécuter la requête et obtenir les résultats
+        const result = await query;  // Ici, 'query' est déjà une fonction qui exécute la requête.
+
+        // Vérifie si des utilisateurs ont été trouvés
+        if (result.length === 0) {
+            throw new Error('Aucun utilisateur trouvé');
+        }
+
+        // Retourne le premier utilisateur trouvé
+        return result;  // Si trouvé, retourne l'utilisateur
     } catch (error) {
-        throw new Error('Erreur lors de la création de l\'utilisateur');
+        // Gestion des erreurs
+        throw new Error(error.message);
     }
 };
+// Fonction pour créer un nouvel utilisateur
+import bcrypt from 'bcrypt';
+
+export const createUser = async (nom, prenom, email, motdepasse) => {
+    try {
+        // Hashage sécurisé du mot de passe
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(motdepasse, salt);
+
+        // Requête SQL pour insérer un nouvel utilisateur avec le mot de passe hashé
+        const result = await sql`
+            INSERT INTO utilisateur (nom, prenom, email, motdepasse)
+            VALUES (${nom}, ${prenom}, ${email}, ${hashedPassword})
+            RETURNING idutilisateur, nom, prenom, email
+        `;
+
+        return result[0]; // Retourne l'utilisateur créé
+    } catch (error) {
+        throw new Error('Erreur lors de la création de l\'utilisateur : ' + error.message);
+    }
+};
+
 
 
 // Fonction pour trouver un utilisateur par ID
