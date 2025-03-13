@@ -16,19 +16,18 @@ export const createProfesseur = async (idutilisateur) => {
 
 
 export const isProfesseur = async (idutilisateur) => {
-    const query = sql`
+    try {
+    const query =  await sql`
         SELECT idutilisateur
         FROM professeur
         WHERE idutilisateur = ${idutilisateur}
         LIMIT 1
     `;
 
-    try {
-        const { rows } = await query;
-        return rows.length > 0 ? rows[0] : null;  // Si l'utilisateur est un étudiant
-    } catch (error) {
-        return null;
-    }
+    return query[0]; // Retourne l'étudiant inséré
+} catch (error) {
+   return null;
+}
 };
 
 

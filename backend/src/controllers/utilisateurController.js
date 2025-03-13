@@ -57,15 +57,16 @@ export const loginUtilisateur = async (req, res) => {
         // Vérifier si c'est un étudiant ou un professeur
         const isEtudiant = await etudiantModel.isEtudiant(utilisateur.idutilisateur);
         const isProfesseur = await professeurModel.isProfesseur(utilisateur.idutilisateur);
+        console.log(isEtudiant ,isProfesseur);
 
-        let role = '';
-        let redirectURL = '';
+        let role = "";
+        let redirectURL = "";
         if (isEtudiant) {
             role = 'etudiant';
             redirectURL = '/dashboard/etudiant';
         } else if (isProfesseur) {
-            role = 'professeur';
-            redirectURL = '/dashboard/professeur';
+            role = "professeur";
+            redirectURL = "/dashboard/professeur";
         }
 
         // Créer un token JWT
@@ -106,7 +107,7 @@ export const getAllUtilisateurs = async (req, res) => {
 
 export const getUtilisateurById = async (req, res) => {
     try {
-        const utilisateur = await utilisateurModel.getUtilisateurById(req.params.id);
+        const utilisateur = await utilisateurModel.findUserById(req.params.id);
         if (!utilisateur) return res.status(404).json({ message: "Utilisateur non trouvé" });
         res.status(200).json(utilisateur);
     } catch (error) {
@@ -116,7 +117,9 @@ export const getUtilisateurById = async (req, res) => {
 
 export const updateUtilisateur = async (req, res) => {
     try {
-        const updatedUtilisateur = await utilisateurModel.updateUtilisateur(req.params.id, req.body);
+        const { idutilisateur, nom, prenom, email, password } = req.body;
+        // console.log(req.body);
+        const updatedUtilisateur = await utilisateurModel.updateUtilisateur(idutilisateur, nom, prenom, email, password);
         res.status(200).json(updatedUtilisateur);
     } catch (error) {
         res.status(500).json({ error: error.message });

@@ -14,19 +14,17 @@ export const createEtudiant = async (idutilisateur, ine) => {
     }
 };
 
-
+//rectifier nako tck ca ne marchais pas quoi  ma ayy 'cest redirect url que marchais pas 
 
 export const isEtudiant = async (idutilisateur) => {
-    const query = sql`
+    try {
+    const query = await sql`
         SELECT idutilisateur
         FROM etudiant
         WHERE idutilisateur = ${idutilisateur}
         LIMIT 1
     `;
-
-    try {
-        const { rows } = await query;
-        return rows.length > 0 ? rows[0] : null;  // Si l'utilisateur est un étudiant
+        return query[0];  // Si l'utilisateur est un étudiant
     } catch (error) {
         return null;
     }
@@ -36,13 +34,12 @@ export const isEtudiant = async (idutilisateur) => {
 
 
 export const getAllEtudiants = async () => {
-    const query = sql`
+    try {
+    const query = await sql`
         SELECT * FROM etudiant
     `;
-
-    try {
-        const { rows } = await query;  // On utilise "await query" ici pour exécuter la requête
-        return rows; // Retourne tous les étudiants
+     // On utilise "await query" ici pour exécuter la requête
+        return query; // Retourne tous les étudiants
     } catch (error) {
         throw new Error('Erreur lors de la récupération des étudiants');
     }
@@ -51,19 +48,19 @@ export const getAllEtudiants = async () => {
 
 
 export const getEtudiantById = async (idutilisateur) => {
-    const query = sql`
+    try {
+    const query = await sql`
         SELECT *
         FROM etudiant
         WHERE idutilisateur = ${idutilisateur}
         LIMIT 1
     `;
 
-    try {
-        const { rows } = await query;  // Utilisation de "await" pour exécuter la requête
-        if (rows.length === 0) {
+          // Utilisation de "await" pour exécuter la requête
+        if (query.length === 0) {
             throw new Error('Étudiant non trouvé');
         }
-        return rows[0]; // Retourne l'étudiant trouvé
+        return query[0]; // Retourne l'étudiant trouvé
     } catch (error) {
         throw new Error('Erreur lors de la récupération de l\'étudiant');
     }

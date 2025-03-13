@@ -1,27 +1,22 @@
 import sql from '../config/db.js'; 
-import bcrypt from 'bcryptjs';
-  
+import bcrypt from 'bcrypt';
 // Fonction pour vérifier si un utilisateur existe déjà par email
 export const findUserByEmail = async (email) => {
     try {
         // Construire la requête SQL avec les paramètres
-        const query = sql`
+        const query = await sql`
             SELECT idutilisateur, nom, prenom, email, motdepasse
             FROM utilisateur
             WHERE email = ${email}  
             LIMIT 1
         `;
-
-        // Exécuter la requête et obtenir les résultats
-        const result = await query;  // Ici, 'query' est déjà une fonction qui exécute la requête.
-
         // Vérifie si des utilisateurs ont été trouvés
         // if (result.length === 0) {
         //     throw new Error('Utilisateur non trouvé');
         // }
 
         // Retourne le premier utilisateur trouvé
-        return result[0];  // Si trouvé, retourne l'utilisateur
+        return query[0];  // Si trouvé, retourne l'utilisateur
     } catch (error) {
         // Gestion des erreurs
         throw new Error(error.message);
@@ -30,22 +25,14 @@ export const findUserByEmail = async (email) => {
 export const getAllUtilisateurs = async () => {
     try {
         // Construire la requête SQL avec les paramètres
-        const query = sql`
+        const query = await sql`
             SELECT idutilisateur, nom, prenom, email, motdepasse
             FROM utilisateur`;
-
-        // Exécuter la requête et obtenir les résultats
-        const result = await query;  // Ici, 'query' est déjà une fonction qui exécute la requête.
-
-        // Vérifie si des utilisateurs ont été trouvés
-        if (result.length === 0) {
+        if (query.length === 0) {
             throw new Error('Aucun utilisateur trouvé');
         }
-
-        // Retourne le premier utilisateur trouvé
-        return result;  // Si trouvé, retourne l'utilisateur
+        return query; 
     } catch (error) {
-        // Gestion des erreurs
         throw new Error(error.message);
     }
 };
@@ -67,30 +54,83 @@ export const createUser = async (nom, prenom, email, hashedPassword) => {
     }
 };
 
+export const updateUtilisateur = async (idutilisateur, nom, prenom, email, password) => {
+    try {
+        // Vérifie si le mot de passe est défini
+        if (!password) {
+            throw new Error("Le mot de passe est requis pour la mise à jour.");
+        }
+
+        // Génération du sel et hash du mot de passe
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Requête SQL pour mettre à jour les informations d'un utilisateur
+        const result = await sql`
+            UPDATE utilisateur
+            SET 
+                nom = ${nom}, 
+                prenom = ${prenom}, 
+                email = ${email}, 
+                motdepasse = ${hashedPassword}
+            WHERE idutilisateur = ${idutilisateur}
+            RETURNING idutilisateur, nom, prenom, email
+        `;
+
+        // Vérifie si un utilisateur a été mis à jour
+        if (result.length === 0) {
+            throw new Error('Aucun utilisateur trouvé avec cet ID');
+        }
+
+        return result[0]; // Retourne l'utilisateur mis à jour
+    } catch (error) {
+        throw new Error('Erreur lors de la mise à jour de l\'utilisateur : ' + error.message);
+    }
+};
+
+
+
+
 
 
 // Fonction pour trouver un utilisateur par ID
 export const findUserById = async (idutilisateur) => {
     // Requête SQL pour récupérer un utilisateur par son ID
-    const query = sql`
+    try {
+    const query = await sql`
         SELECT *
         FROM utilisateur
         WHERE idutilisateur = ${idutilisateur}
         LIMIT 1
     `;
 
-    try {
         // Exécution de la requête SQL
-        const { rows } = await query;  // Exécution de la requête avec "await"
+        // Exécution de la requête avec "await"
 
-        if (rows.length === 0) {
+        if (query.length === 0) {
             throw new Error('Utilisateur non trouvé');
         }
 
         // Retourne le premier utilisateur trouvé
-        return rows[0];  // Renvoie l'utilisateur trouvé
+        return query[0];  // Renvoie l'utilisateur trouvé
     } catch (error) {
         throw new Error(error.message);
+    }
+};
+
+export const deleteUtilisateur = async (idutilisateur) => {
+    try {
+        const result = await sql`
+            DELETE FROM utilisateur
+            WHERE idutilisateur = ${idutilisateur}
+            RETURNING idutilisateur, nom, prenom, email`;
+        if (result.length === 0) {
+            throw new Error('Aucun utilisateur trouvé avec cet ID');
+        }
+
+        return result[0]; // Retourne les informations de l'utilisateur supprimé
+    } catch (error) {
+        throw new Error('Erreur lors de la suppression de l\'utilisateur : ' + error.message);
     }
 };
 
