@@ -8,13 +8,13 @@ import Image from "next/image"
       <div className="lg:flex items-center hidden h-full justify-center py-12">
         <Login/>
       </div>
-      <div className="hidden px-8 bg-gray-50 lg:block">
+      <div className="hidden  lg:block">
         <Image
           src="/logo.jpg"
           alt="Image"
           width={890} 
           height={890}
-          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          className="h-full w-full object-cover"
         />
       </div>
       <div className="h-96 md:hidden flex items-center justify-center w-full text-2xl font-extrabold">
