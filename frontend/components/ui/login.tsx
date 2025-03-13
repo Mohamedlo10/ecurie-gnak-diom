@@ -6,9 +6,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, CSSProperties, useEffect, useState } from "react";
-/* import Icon from 'react-icons-kit';
-import eye from 'react-icons-kit/feather/eye';
-import eyeOff from 'react-icons-kit/feather/eyeOff'; */
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import BeatLoader from "react-spinners/BeatLoader";
 const override: CSSProperties = {
   display: "block",
@@ -18,6 +16,7 @@ const override: CSSProperties = {
 
 function Login() {
   const router = useRouter();
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,16 +27,16 @@ function Login() {
   const [type, setType] = useState('password');
 
 
+  const toggleAuthMode = () => {
+    setIsLogin(!isLogin);
+    setEmail("");
+    setPassword("");
+  };
 
-  const handleToggle = () => {
-    // if (type==='password'){
-    //    setIcon(eye);
-    //    setType('text')
-    // } else {
-    //    setIcon(eyeOff)
-    //    setType('password')
-    // }
- }
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
 
 
@@ -55,30 +54,44 @@ function Login() {
       router.push(`/dashboard`);
     };
 
-    const handleLogin = async (e: ChangeEvent<HTMLFormElement>) => {
+    const handleAuth = async (e: ChangeEvent<HTMLFormElement>) => {
       e.preventDefault();
+    
       setIsLoading(true);
       setError('');
     
       try {
-        const { data, error }: any = await userConnection(email, password);
-        console.log(data)
+        let response;
+        
+        if (isLogin) {
+          // Connexion
+          const { data, error }: any = await userConnection(email, password);
+          response = { data, error };
+        } else {
+          // Inscription
+          const { data, error }: any = await (email, password);
+          response = { data, error };
+        }
+    
+        const { data, error } = response;
+    
         if (error) {
           setError(error.message);
         } else if (data) {
-          // Redirige vers le tableau de bord
-          localStorage.setItem('supabase_session', JSON.stringify(data.user.user_metadata.poste));
+          // Stockage session utilisateur
+          localStorage.setItem('supabase_session', JSON.stringify(data));
           localStorage.setItem('user_session', JSON.stringify(data.user));
+    
+          // Redirection après connexion ou inscription
           router.push('/dashboard');
         }
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred.');
-      }
-      finally{
-        setIsLoading(false)
-
+      } finally {
+        setIsLoading(false);
       }
     };
+    
     
 
     
@@ -107,7 +120,7 @@ function Login() {
               Enter your email below to login to your account
             </p>
           </div>
-          <form onSubmit={handleLogin} className="grid gap-4">
+          <form onSubmit={handleAuth} className="grid gap-4">
             <div className="grid  gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -133,16 +146,16 @@ function Login() {
               <div className=" flex flex-row gap-full">
               <Input id="password" 
                className="bg-white h-14 text-black" 
-               type={type}
+               type={showPassword ? 'text' : 'password'}
                placeholder="Password" 
                value={password}
                onChange={(e) => setPassword(e.target.value)}
                required>
 
                </Input>
-               {/* <span className="flex justify-around items-center" onClick={handleToggle}>
-                  <Icon className="absolute mr-14 text-zinc-500 hover:bg-slate-200 p-1 rounded-full " icon={icon} size={24}/>
-              </span> */}
+               <span className="flex justify-around items-center" onClick={togglePasswordVisibility}>
+               {showPassword ? <FiEyeOff className="absolute mr-14 text-zinc-500 hover:bg-slate-200 p-1 rounded-full " size={24} /> : <FiEye className="absolute mr-14 text-zinc-500 hover:bg-slate-200 p-1 rounded-full " size={24} />}
+              </span>
               </div>
              
             </div>
