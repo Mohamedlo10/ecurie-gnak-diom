@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import * as utilisateurModel from '../models/utilisateurModel.js';
 import * as etudiantModel from '../models/etudiantModel.js';
@@ -43,13 +43,15 @@ export const loginUtilisateur = async (req, res) => {
         // Vérifier si l'utilisateur existe
         const utilisateur = await utilisateurModel.findUserByEmail(email);
         if (!utilisateur) {
-            return res.status(400).json({ message: 'login invalides ' });
+            return res.status(400).json({ message: 'Identifiants invalides' });
         }
+        console.log("Mot de passe fourni :", motdepasse);
+        console.log("Mot de passe stocké (hashé) :", utilisateur.motdepasse);
 
-        // Vérifier le mot de passe avec bcrypt
-        const isMatch = await (motdepasse == utilisateur.motdepasse);
+        // Vérifier le mot de passe avec bcrypt (SANS REHASHER)
+        const isMatch = await bcrypt.compare( motdepasse, utilisateur.motdepasse);
         if (!isMatch) {
-            return res.status(400).json({ message: 'mdp invalides' });
+            return res.status(400).json({ message: 'Mot de passe incorrect' });
         }
 
         // Vérifier si c'est un étudiant ou un professeur
@@ -90,6 +92,7 @@ export const loginUtilisateur = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 
 export const getAllUtilisateurs = async (req, res) => {

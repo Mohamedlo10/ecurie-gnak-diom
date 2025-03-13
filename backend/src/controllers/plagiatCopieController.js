@@ -1,4 +1,4 @@
-import PlagiatCopieModel from "../models/plagiatcopieModel.js";
+import PlagiatCopieModel from "../models/plagiatCopieModel.js";
 
 
 export const createPlagiatCopie = async (req, res) => {

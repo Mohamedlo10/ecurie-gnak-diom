@@ -1,5 +1,5 @@
 import sql from '../config/db.js'; 
-
+import bcrypt from 'bcryptjs';
   
 // Fonction pour vérifier si un utilisateur existe déjà par email
 export const findUserByEmail = async (email) => {
@@ -50,13 +50,9 @@ export const getAllUtilisateurs = async () => {
     }
 };
 // Fonction pour créer un nouvel utilisateur
-import bcrypt from 'bcrypt';
 
-export const createUser = async (nom, prenom, email, motdepasse) => {
+export const createUser = async (nom, prenom, email, hashedPassword) => {
     try {
-        // Hashage sécurisé du mot de passe
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(motdepasse, salt);
 
         // Requête SQL pour insérer un nouvel utilisateur avec le mot de passe hashé
         const result = await sql`
