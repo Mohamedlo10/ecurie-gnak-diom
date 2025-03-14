@@ -1,12 +1,21 @@
 import * as suivreModel from "../models/suivreModel.js";
-// , getOne, exclureEtudiant 
+
 export const addEtudiant = async (req, res) => {
     try {
         const { idcours, idutilisateur } = req.body;
-        const suivre = await suivreModel.addEtudiant(idcours, idutilisateur);
-        res.status(201).json({ message: "Suivi créé avec succès", data: suivre });
+        console.log(idcours, idutilisateur);
+        if (!idcours || !idutilisateur) {
+            return res.status(400).json({ error: "Les identifiants du cours et de l'utilisateur sont requis." });
+        }
+
+        const newSuivre = await suivreModel.addEtudiant(idcours, idutilisateur);
+
+        return res.status(201).json({
+            message: "Étudiant inscrit avec succès au cours.",
+            data: newSuivre
+        });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
     }
 };
 
@@ -54,15 +63,16 @@ export const getEtudiantByIdCours = async (req, res) => {
 
 export const getOne = async (req, res) => {
     try {
-        const { idcours, idEtudiant } = req.params;
+        const { idcours, idutilisateur } = req.params;
 
         // Vérifier si les deux paramètres sont fournis
-        if (!idcours || !idEtudiant) {
+        console.log(idcours, idutilisateur);
+        if (!idcours || !idutilisateur) {
             return res.status(400).json({ error: "Les identifiants du cours et de l'étudiant sont requis." });
         }
 
         // Récupérer le suivi spécifique
-        const suivre = await suivreModel.getOne(idcours, idEtudiant);
+        const suivre = await suivreModel.getOne(idcours, idutilisateur);
 
         // Vérifier si un résultat a été trouvé
         if (!suivre) {
