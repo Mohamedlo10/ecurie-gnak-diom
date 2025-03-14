@@ -70,7 +70,7 @@ export const getProfesseurById = async (idutilisateur) => {
 
 export const deleteProfesseur = async (idutilisateur) => {
     const query = sql`
-        DELETE FROM professeur
+        DELETE FROM utilisateur
         WHERE idutilisateur = ${idutilisateur}
         RETURNING *
     `;

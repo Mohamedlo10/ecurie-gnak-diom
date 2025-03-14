@@ -1,37 +1,85 @@
-import SuivreModel from "../models/suivreModel.js";
-
-export const createSuivre = async (req, res) => {
+import * as suivreModel from "../models/suivreModel.js";
+// , getOne, exclureEtudiant 
+export const addEtudiant = async (req, res) => {
     try {
         const { idcours, idutilisateur } = req.body;
-        const suivre = await SuivreModel.createSuivre({ idcours, idutilisateur });
+        const suivre = await suivreModel.addEtudiant(idcours, idutilisateur);
         res.status(201).json({ message: "Suivi créé avec succès", data: suivre });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-export const getAllSuivres = async (req, res) => {
+
+export const getCoursByIdEtudiant = async (req, res) => {
+    const { idutilisateur } = req.params; // Récupération de l'ID depuis l'URL
+    console.log(idutilisateur);
     try {
-        const suivres = await SuivreModel.getAllSuivres();
-        res.status(200).json(suivres);
+        if (!idutilisateur) {
+            return res.status(400).json({ error: "L'identifiant de l'utilisateur est requis." });
+        }
+
+        const cours = await suivreModel.getCoursByIdEtudiant(idutilisateur);
+
+        if (cours.length === 0) {
+            return res.status(404).json({ message: "Aucun cours trouvé pour cet étudiant." });
+        }
+
+        return res.status(200).json(cours);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
     }
 };
 
-export const getSuivreById = async (req, res) => {
+
+export const getEtudiantByIdCours = async (req, res) => {
     try {
-        const suivre = await SuivreModel.getSuivreById(req.params.id);
-        if (!suivre) return res.status(404).json({ message: "Suivi non trouvé" });
-        res.status(200).json(suivre);
+        const { idcours } = req.params;
+
+        if (!idcours) {
+            return res.status(400).json({ error: "L'identifiant du cours est requis." });
+        }
+        const etudiants = await suivreModel.getEtudiantByIdCours(idcours);
+
+        if (etudiants.length === 0) {
+            return res.status(404).json({ message: "Aucun étudiant trouvé pour ce cours." });
+        }
+
+        return res.status(200).json(etudiants);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
     }
 };
 
-export const deleteSuivre = async (req, res) => {
+
+export const getOne = async (req, res) => {
     try {
-        const result = await SuivreModel.deleteSuivre(req.params.id);
+        const { idcours, idEtudiant } = req.params;
+
+        // Vérifier si les deux paramètres sont fournis
+        if (!idcours || !idEtudiant) {
+            return res.status(400).json({ error: "Les identifiants du cours et de l'étudiant sont requis." });
+        }
+
+        // Récupérer le suivi spécifique
+        const suivre = await suivreModel.getOne(idcours, idEtudiant);
+
+        // Vérifier si un résultat a été trouvé
+        if (!suivre) {
+            return res.status(404).json({ message: "Suivi non trouvé" });
+        }
+
+        return res.status(200).json(suivre);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+
+export const exclureEtudiant  = async (req, res) => {
+    try {
+        const { idCours, idutilisateur } = req.body;
+        const result = await suivreModel.exclureEtudiant (idCours, idutilisateur);
         res.status(200).json({ message: "Suivi supprimé avec succès", data: result });
     } catch (error) {
         res.status(500).json({ error: error.message });

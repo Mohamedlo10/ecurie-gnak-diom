@@ -1,6 +1,6 @@
 import sql from '../config/db.js';
 
-// Fonction pour insérer un étudiant
+
 export const createEtudiant = async (idutilisateur, ine) => {
     try {
     const query = await sql`
@@ -20,11 +20,11 @@ export const isEtudiant = async (idutilisateur) => {
     try {
     const query = await sql`
         SELECT idutilisateur
-        FROM etudiant
+        FROM etudiant natural join utilisateur
         WHERE idutilisateur = ${idutilisateur}
         LIMIT 1
     `;
-        return query[0];  // Si l'utilisateur est un étudiant
+        return query[0];  
     } catch (error) {
         return null;
     }
@@ -36,10 +36,10 @@ export const isEtudiant = async (idutilisateur) => {
 export const getAllEtudiants = async () => {
     try {
     const query = await sql`
-        SELECT * FROM etudiant
+        SELECT * FROM etudiant natural join utilisateur
     `;
      // On utilise "await query" ici pour exécuter la requête
-        return query; // Retourne tous les étudiants
+        return query; 
     } catch (error) {
         throw new Error('Erreur lors de la récupération des étudiants');
     }
@@ -51,16 +51,14 @@ export const getEtudiantById = async (idutilisateur) => {
     try {
     const query = await sql`
         SELECT *
-        FROM etudiant
+        FROM etudiant natural join utilisateur
         WHERE idutilisateur = ${idutilisateur}
         LIMIT 1
     `;
-
-          // Utilisation de "await" pour exécuter la requête
-        if (query.length === 0) {
-            throw new Error('Étudiant non trouvé');
-        }
-        return query[0]; // Retourne l'étudiant trouvé
+    if (query.length === 0) {
+        throw new Error('Étudiant non trouvé');
+    }
+    return query[0]; 
     } catch (error) {
         throw new Error('Erreur lors de la récupération de l\'étudiant');
     }
@@ -68,15 +66,13 @@ export const getEtudiantById = async (idutilisateur) => {
 
 
 export const deleteEtudiant = async (idutilisateur) => {
-    const query = sql`
-        DELETE FROM etudiant
+    try {
+    const query = await sql`
+        DELETE FROM utilisateur
         WHERE idutilisateur = ${idutilisateur}
         RETURNING *
     `;
-
-    try {
-        const { rows } = await query;  // Exécution de la requête
-        return rows[0]; // Retourne l'étudiant supprimé
+        return query[0]; 
     } catch (error) {
         throw new Error('Erreur lors de la suppression de l\'étudiant');
     }

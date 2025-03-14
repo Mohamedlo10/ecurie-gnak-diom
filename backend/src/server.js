@@ -4,7 +4,7 @@ import express from 'express';
 import sql from './config/db.js';
 import PdfParse from 'pdf-parse';
 import correctionRoutes from './routes/correctionRoutes.js';
-import classeRoutes from './routes/coursRoutes.js';
+import coursRoutes from './routes/coursRoutes.js';
 import sujetRoutes from './routes/sujetRoutes.js';
 import utilisateurRoutes from './routes/utilisateurRoutes.js';
 import copieRoutes from './routes/copieRoutes.js';
@@ -39,7 +39,7 @@ app.get('/', (req, res) => {
 
 // Utilisation des routes API
 app.use('/api/utilisateurs', utilisateurRoutes);
-app.use('/api/classe', classeRoutes);
+app.use('/api/cours', coursRoutes);
 app.use('/api/sujet', sujetRoutes);
 app.use('/api/correction', correctionRoutes);
 app.use('/api/copie', copieRoutes);
