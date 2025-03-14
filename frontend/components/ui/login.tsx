@@ -1,8 +1,5 @@
 "use client";
-import { userConnection } from "@/app/api/utilisateur/query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { userConnection, userInscription } from "@/app/api/utilisateur/query";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, CSSProperties, useEffect, useState } from "react";
@@ -23,9 +20,19 @@ function Login() {
   let [color, setColor] = useState("#ffffff");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   // const [icon, setIcon] = useState(eyeOff);
   const [type, setType] = useState('password');
-
+  const [user, setUser] = useState({
+    prenom: "",
+    nom: "",
+    email: "",
+    motdepasse: "",
+    confirmPassword:"",
+    role: "",
+    ine: "",
+  });
+  
 
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
@@ -37,8 +44,15 @@ function Login() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
 
+  const handleInputChange = (e : ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUser({ ...user, [name]: value });
+  };
 
  useEffect(() => {
   // Synchronisez les champs avec l'état local lors du montage
@@ -56,41 +70,52 @@ function Login() {
 
     const handleAuth = async (e: ChangeEvent<HTMLFormElement>) => {
       e.preventDefault();
-    
       setIsLoading(true);
       setError('');
     
       try {
-        let response;
-        
+        let data;
+    
         if (isLogin) {
           // Connexion
-          const { data, error }: any = await userConnection(email, password);
-          response = { data, error };
+          data = await userConnection(user.email, user.motdepasse);
+          console.log("Connexion réussie:", data);
+    
+          if (data) {
+            localStorage.setItem('role_user', JSON.stringify(data.role));
+            localStorage.setItem('user_session', JSON.stringify(data.utilisateur));
+            handleNavigation()         
+          } 
+            else {
+            throw new Error(data.message || "Échec de connexion.");
+          }
         } else {
           // Inscription
-          const { data, error }: any = await (email, password);
-          response = { data, error };
-        }
+          data = await userInscription(
+            user.email,
+            user.motdepasse,
+            user.nom,
+            user.prenom,
+            user.role,
+            user.ine
+          );
+          console.log("Réponse du backend après inscription:", data);
     
-        const { data, error } = response;
-    
-        if (error) {
-          setError(error.message);
-        } else if (data) {
-          // Stockage session utilisateur
-          localStorage.setItem('supabase_session', JSON.stringify(data));
-          localStorage.setItem('user_session', JSON.stringify(data.user));
-    
-          // Redirection après connexion ou inscription
-          router.push('/dashboard');
+          if (data) {
+            localStorage.setItem('user_session', JSON.stringify(data));
+            router.push('/dashboard');
+          } else {
+            throw new Error(data.message || "Inscription échouée.");
+          }
         }
       } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred.');
+        setError(err.message || 'Une erreur est survenue.');
       } finally {
         setIsLoading(false);
       }
     };
+    
+    
     
     
 
@@ -112,66 +137,178 @@ function Login() {
       );
     }
     
-  return (
-    <div className="mx-auto grid text-white  text-bold shadow-2xl h-3/5 p-4 px-20 w-2/3 rounded-sm gap-4">
-          <div className="grid gap-2 text-center">
-            <h1 className="text-2xl  text- font-bold">Login</h1>
-            <p className="text-balance font-medium ">
-              Enter your email below to login to your account
-            </p>
+    return (
+      <div className="mx-auto grid text-white shadow-2xl h-fit p-4 px-20 w-2/3 rounded-sm gap-2">
+        <div className="grid gap-2 text-center">
+          <h1 className="text-xl font-bold">
+            {isLogin ? "Login" : "Sign Up"}
+          </h1>
+          <p className="text-sm font-medium">
+            {isLogin
+              ? "Enter your email below to login to your account"
+              : "Create an account to get started"}
+          </p>
+        </div>
+  
+        <form onSubmit={handleAuth}  className="grid overflow-y-auto max-h-[80vh] gap-4">
+        {!isLogin&&(
+          <>
+          <div className="grid gap-2">
+          <label htmlFor="nom">Nom</label>
+          <input
+            id="nom"
+            name="nom"
+            type="text"
+            className="bg-white text-black h-13 p-2 rounded-md"
+            placeholder="Votre nom"
+            value={user.nom}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <label htmlFor="prenom">Prénom</label>
+          <input
+            id="prenom"
+            name="prenom"
+            type="text"
+            className="bg-white text-black h-13 p-2 rounded-md"
+            placeholder="Votre prénom"
+            value={user.prenom}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        </>
+        )}
+
+          <div className="grid gap-2">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              className="bg-white text-black h-13 p-2 rounded-md"
+              placeholder="m@example.com"
+              value={user.email}
+              onChange={handleInputChange}
+              required
+            />
           </div>
-          <form onSubmit={handleAuth} className="grid gap-4">
-            <div className="grid  gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                className="bg-white text-black h-14"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center ">
-                <Label htmlFor="password">Password</Label>
+  
+          <div className="grid gap-2">
+            <div className="flex items-center">
+              <label htmlFor="password">Password</label>
+              {isLogin && (
                 <Link
                   href="/forgot-password"
-                  className="ml-auto inline-block  text-sm underline "
+                  className="ml-auto text-sm underline"
                 >
                   Forgot your password?
                 </Link>
-              </div>
-              <div className=" flex flex-row gap-full">
-              <Input id="password" 
-               className="bg-white h-14 text-black" 
-               type={showPassword ? 'text' : 'password'}
-               placeholder="Password" 
-               value={password}
-               onChange={(e) => setPassword(e.target.value)}
-               required>
-
-               </Input>
-               <span className="flex justify-around items-center" onClick={togglePasswordVisibility}>
-               {showPassword ? <FiEyeOff className="absolute mr-14 text-zinc-500 hover:bg-slate-200 p-1 rounded-full " size={24} /> : <FiEye className="absolute mr-14 text-zinc-500 hover:bg-slate-200 p-1 rounded-full " size={24} />}
-              </span>
-              </div>
-             
+              )}
             </div>
-            <Button type="submit"  className="w-full h-14 cursor-pointer hover:bg-black mt-2 bg-red-800">
-                  Login
-            </Button>
-            
-          </form>
-          <div className="mb-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link href="#" className="underline">
-              Sign up
-            </Link>
+  
+            <div className="relative flex items-center">
+              <input
+                id="motdepasse"
+                name="motdepasse"
+                className="bg-white h-13 text-black w-full p-2 rounded-md"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={user.motdepasse}
+                onChange={handleInputChange}
+                required
+              />
+              <span
+                className="absolute right-3 cursor-pointer text-zinc-500 hover:bg-slate-200 p-1 rounded-full"
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? <FiEyeOff size={24} /> : <FiEye size={24} />}
+              </span>
+            </div>
           </div>
-        </div>
-  )
+  
+          {!isLogin && (
+            <>
+            
+            <div className="grid gap-2">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <div className="relative flex items-center">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  className="bg-white h-13 w-full text-black p-2 rounded-md"
+                  value={user.confirmPassword}
+                  onChange={handleInputChange}
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  required
+                />
+                <span
+                  className="absolute right-3 cursor-pointer text-zinc-500 hover:bg-slate-200 p-1 rounded-full"
+                  onClick={toggleConfirmPasswordVisibility}
+                >
+                  {showConfirmPassword ? <FiEyeOff size={24} /> : <FiEye size={24} />}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="role">Role</label>
+              <select
+                id="role"
+                className="bg-white text-black h-13 p-2 rounded-md"
+                value={user.role}
+                onChange={(e) => setUser({ ...user, role: e.target.value })} 
+                required
+              >
+                <option value="">Sélectionner un rôle</option>
+                <option value="etudiant">Étudiant</option>
+                <option value="professeur">Professeur</option>
+              </select>
+            </div>
+
+{user.role==="etudiant"&&(
+   <div className="grid gap-2">
+   <label htmlFor="ine">INE</label>
+   <input
+     id="ine"
+     type="text"
+     name="ine"
+     className="bg-white text-black h-13 p-2 rounded-md"
+     placeholder="INE"
+     value={user.ine}
+     onChange={handleInputChange}
+     required
+   />
+ </div>
+)
+
 }
+           
+         
+
+          </>
+          )}
+  
+          <button
+            type="submit"
+            className="w-full h-13 cursor-pointer hover:bg-black mt-2 bg-red-800 text-white rounded-md"
+          >
+            {isLogin ? "Login" : "Sign Up"}
+          </button>
+        </form>
+  
+        <div className="mb-4 text-center text-sm">
+          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+          <button onClick={toggleAuthMode} className="underline text-blue-400">
+            {isLogin ? "Sign up" : "Login"}
+          </button>
+        </div>
+      </div>
+    );
+  };
 
 export default Login

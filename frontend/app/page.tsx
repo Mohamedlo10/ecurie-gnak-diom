@@ -5,7 +5,7 @@ import Image from "next/image"
   export default function home() {
   return (
     <div className="w-full lg:grid h-[100vh]  bg-zinc-800 lg:grid-cols-2 ">
-      <div className="lg:flex items-center hidden h-full justify-center py-12">
+      <div className="lg:flex items-center hidden h-full justify-center ">
         <Login/>
       </div>
       <div className="hidden  lg:block">
