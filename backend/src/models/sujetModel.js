@@ -1,48 +1,30 @@
-import supabase from "../config/db.js";  // Connexion à Supabase
+// backend/src/models/sujetModel.js
+import sql from "../config/db.js";
 
-const SujetModel = {
-    async createSujet({ nom, idclasse, urlsujet }) {
-        const { data, error } = await supabase
-            .from("sujet")
-            .insert([{ nom, idclasse, urlsujet }]);
-
-        if (error) throw error;
-        return data;
-    },
-
-    async getAllSujets() {
-        const { data, error } = await supabase.from("sujet").select("*");
-        if (error) throw error;
-        return data;
-    },
-
-    async getSujetById(id) {
-        const { data, error } = await supabase
-            .from("sujet")
-            .select("*")
-            .eq("idsujet", id)
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    async updateSujet(id, updateData) {
-        const { data, error } = await supabase
-            .from("sujet")
-            .update(updateData)
-            .eq("idsujet", id);
-        if (error) throw error;
-        return data;
-    },
-
-    async deleteSujet(id) {
-        const { data, error } = await supabase
-            .from("sujet")
-            .delete()
-            .eq("idsujet", id);
-        if (error) throw error;
-        return data;
-    }
+export const createSujet = async (nomSujet, urlSujet, idCours) => {
+  const query = await sql`
+    INSERT INTO sujet(nomSujet, urlSujet, idCours)
+    VALUES(${nomSujet}, ${urlSujet}, ${idCours})
+    RETURNING *;
+  `;
+  return query[0];
 };
 
-export default SujetModel;
+export const getAllSujetByIdCours = async (idCours) => {
+  return (await sql`SELECT * FROM sujet WHERE idCours=${idCours};`);
+};
+
+export const getSujetById = async (idSujet) => {
+  return (await sql`SELECT * FROM sujet WHERE idSujet=${idSujet};`)[0];
+};
+
+export const updateSujet = async (idSujet, nomSujet, urlSujet) => {
+  return (await sql`
+    UPDATE sujet SET nomSujet=${nomSujet}, urlSujet=${urlSujet}
+    WHERE idSujet=${idSujet} RETURNING *;
+  `)[0];
+};
+
+export const deleteSujet = async (idSujet) => {
+  return (await sql`DELETE FROM sujet WHERE idSujet=${idSujet} RETURNING *;`)[0];
+};

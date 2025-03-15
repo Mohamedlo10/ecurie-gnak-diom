@@ -28,7 +28,7 @@ export const registerUtilisateur = async (req, res) => {
         } else if (role === 'professeur') {
             await professeurModel.createProfesseur(newUser.idutilisateur);
         }
-
+        newUser.role = role;
         res.status(201).json({ message: 'Utilisateur créé avec succès', utilisateur: newUser, role });
 
     } catch (error) {
