@@ -8,8 +8,7 @@ import {
 } from "lucide-react";
 import React from 'react';
 
-import { getCommandesClient } from "@/app/api/commandes/query";
-import { Commande } from "@/app/dashboard/commandes/schema";
+import { Etudiant } from "@/interface/type";
 import Drawer from '@mui/material/Drawer';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -40,7 +39,7 @@ const CommandeInfo: React.FC<CommandeInfoProps> = ({ userId }) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [total, setTotal] = useState(0);
 
-  const [commandes, setCommandes] = useState<Commande[]>([]);
+  const [commandes, setCommandes] = useState<Etudiant[]>([]);
 
 
 
@@ -49,7 +48,7 @@ const CommandeInfo: React.FC<CommandeInfoProps> = ({ userId }) => {
       setIsLoading(true)
       try {
 
-        const data: any = await getCommandesClient(userId)
+        /* const data: any = await getCommandesClient(userId)
         console.log(data)
 
         if (data && data.length > 0) {
@@ -57,7 +56,7 @@ const CommandeInfo: React.FC<CommandeInfoProps> = ({ userId }) => {
           setCommandes(data)
           // setTotal(data.length); 
          
-        }
+        } */
         
       } catch (error) {
         console.error("Error fetching room details:", error)

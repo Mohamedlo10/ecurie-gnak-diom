@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import * as utilisateurModel from '../models/utilisateurModel.js';
 import * as etudiantModel from '../models/etudiantModel.js';
 import * as professeurModel from '../models/professeurModel.js';
+import * as utilisateurModel from '../models/utilisateurModel.js';
 
 // Inscription d'un utilisateur
 export const registerUtilisateur = async (req, res) => {
@@ -80,7 +80,7 @@ export const loginUtilisateur = async (req, res) => {
             message: 'Connexion réussie',
             token,
             utilisateur: {
-                id: utilisateur.idutilisateur,
+                idutilisateur: utilisateur.idutilisateur,
                 nom: utilisateur.nom,
                 prenom: utilisateur.prenom,
                 email: utilisateur.email,

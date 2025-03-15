@@ -1,6 +1,5 @@
 "use client";
 import { userConnection, userInscription } from "@/app/api/utilisateur/query";
-import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, CSSProperties, useEffect, useState } from "react";
 import { FiEye, FiEyeOff } from 'react-icons/fi';
@@ -119,7 +118,7 @@ function Login() {
           console.log("Réponse du backend après inscription:", data);
     
           if (data) {
-            localStorage.setItem('user_session', JSON.stringify(data));
+            localStorage.setItem('user_session', JSON.stringify(data.utilisateur));
             router.push('/dashboard');
           } else {
             throw new Error(data.message || "Inscription échouée.");

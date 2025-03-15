@@ -14,12 +14,16 @@
  }; */
 
 export type User={
-  id:string,
+  idutilisateur:string,
   nom: string,
   prenom:string,
   email:string,
   role: string
 }
+
+export type Etudiant = User & {
+  ine: string;
+};
 
 export type Cours={
   idcours:string,

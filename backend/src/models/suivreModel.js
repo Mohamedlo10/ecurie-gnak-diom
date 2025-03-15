@@ -25,9 +25,9 @@ export const getCoursByIdEtudiant = async (idutilisateur) => {
                 utilisateur.prenom, 
                 utilisateur.email
             FROM suivre
-            JOIN etudiant ON suivre.idutilisateur = etudiant.idutilisateur
-            JOIN utilisateur ON etudiant.idutilisateur = utilisateur.idutilisateur
             JOIN cours ON suivre.idcours = cours.idcours
+            JOIN professeur ON cours.idutilisateur = professeur.idutilisateur
+            JOIN utilisateur ON professeur.idutilisateur = utilisateur.idutilisateur
             WHERE suivre.idutilisateur = ${idutilisateur};
         `;
         return query;
@@ -47,6 +47,7 @@ export const getEtudiantByIdCours = async (idcours) => {
                 etudiant.ine
             FROM suivre
             JOIN etudiant ON suivre.idutilisateur = etudiant.idutilisateur
+            JOIN utilisateur ON etudiant.idutilisateur = utilisateur.idutilisateur
             WHERE suivre.idcours = ${idcours};
         `;
         return query;

@@ -13,16 +13,22 @@ export const getCoursByidProf = async (idProf:string) => {
     return res.json();
   };
 
-  export const userConnection = async (email: string, motdepasse: string) => {
+  export const getCoursByid = async (idCours:string) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BACK}/api/cours/${idCours}`);
+    if (!res.ok) throw new Error("Erreur lors de la récupération du cours");
+    return res.json();
+  };
+
+  export const creerCours = async (nomCours: string, idutilisateur: string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BACK}/api/utilisateurs/login`,
+        `${process.env.NEXT_PUBLIC_URL_BACK}/api/cours`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email, motdepasse }),
+          body: JSON.stringify({ nomCours, idutilisateur }),
         }
       );
   
@@ -33,7 +39,7 @@ export const getCoursByidProf = async (idProf:string) => {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Erreur de connexion:", error);
+      console.error("Erreur lors de la creation du cours:", error);
       throw error; // Pour gérer l'erreur dans `handleAuth`
     }
   };
