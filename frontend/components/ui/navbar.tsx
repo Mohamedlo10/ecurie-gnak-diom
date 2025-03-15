@@ -1,10 +1,9 @@
-import Image from "next/image"
 
 
 function Navbar() {
   return (
     <div className="flex flex-col h-[8vh]">
-    <header className="flex items-center gap-4 border-b bg-white px-10 h-[8vh] ">
+    <header className="flex items-center gap-4 border-b bg-white px-10 h-[9vh] ">
       <div className="w-full">
         <form>
           <div className="relative ">
@@ -18,15 +17,15 @@ function Navbar() {
         </form>
       </div>
       <div className="grid grid-cols-8 items-center gap-8 h-22 w-60">
-          <div className="col-span-6 flex flex-row gap-4 h-1/3 rounded-xl">
-        <Image
-              src="/logoYabalma.svg"
+          <div className="col-span-6 flex flex-row gap-4 h-1/3 items-center rounded-xl">
+        <img
+              src="/logo.jpg"
               alt="Image"
-              width={70} 
-              height={70}
-              className="h-full w-full object-cover rounded-2xl dark:brightness-[0.2] dark:grayscale"
+              width={800} 
+              height={800}
+              className="h-14 w-14 object-cover rounded-full dark:brightness-[0.2] dark:grayscale"
             />
-            <div className="items-center justify-center h-full text-black flex">YABALMA</div>
+            <div className="items-center justify-center h-full text-black flex">ELITE</div>
         </div>
         <div className="col-span-2">
         {/* <DropdownMenu>
