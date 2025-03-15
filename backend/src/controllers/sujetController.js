@@ -8,7 +8,7 @@ export const createSujet = async (req, res) => {
       const { nomSujet, idCours } = req.body;
       const file = req.file;
       const sujet = await sujetModel.createSujet(nomSujet, '', idCours);
-      const fileName = sujet.idsujet; // <-- plus d'extension, juste l'id
+      const fileName = sujet.idsujet; 
 
       const { error } = await supabase.storage
         .from('sujets')
@@ -40,29 +40,80 @@ export const updateSujet = async (req, res) => {
     const file = req.file;
 
     let sujet = await sujetModel.getSujetById(idSujet);
-    let fileUrl = sujet.urlSujet;
+    let fileUrl = sujet.urlsujet;
 
     if (file) {
-      const fileExt = file.originalname.split('.').pop();
-      const fileName = `${idSujet}.${fileExt}`;
+      const newFileName = `${idSujet}.pdf`; // <-- extension explicite
 
-      await supabase.storage.from('sujets').remove([fileName]); 
+      // ⚠️ Force la suppression précise de l'ancien fichier
+      if (fileUrl && fileUrl.trim() !== "") {
+        const oldFileName = fileUrl.split('/').pop();
+        
+        // Vérifie que l'ancien fichier est exactement celui que tu veux supprimer
+        console.log("Ancien fichier à supprimer:", oldFileName);
 
-      const { data, error } = await supabase.storage
+        const { error: removeError } = await supabase.storage
+          .from('sujets')
+          .remove([oldFileName]);
+
+        if (removeError) {
+          console.error("Erreur suppression fichier existant :", removeError);
+          throw removeError;
+        }
+      }
+
+      // Upload du nouveau fichier explicitement avec extension PDF
+      const { error: uploadError } = await supabase.storage
         .from('sujets')
-        .upload(fileName, file.buffer, { contentType: file.mimetype });
+        .upload(newFileName, file.buffer, { contentType: file.mimetype });
 
-      if (error) throw error;
-      fileUrl = supabase.storage.from('sujets').getPublicUrl(fileName).data.publicUrl;
+      if (uploadError) {
+        console.error("Erreur lors de l'upload :", uploadError);
+        throw uploadError;
+      }
+
+      fileUrl = supabase.storage.from('sujets').getPublicUrl(newFileName).data.publicUrl;
     }
+
+    // Mise à jour finale dans la BD
     sujet = await sujetModel.updateSujet(idSujet, nomSujet, fileUrl);
     res.status(200).json(sujet);
+
   } catch (error) {
+    console.error("Erreur finale :", error);
     res.status(500).json({ error: error.message });
   }
 };
 
+
 export const deleteSujet = async (req, res) => {
-  const sujet = await sujetModel.deleteSujet(req.params.idSujet);
-  res.status(200).json(sujet);
+  try {
+    const { idSujet } = req.params; // <-- 🔥 Corrigé ici exactement comme dans ta route
+
+    let sujet = await sujetModel.getSujetById(idSujet);
+    let fileUrl = sujet.urlsujet;
+
+    if (fileUrl && fileUrl.trim() !== "") {
+      const oldFileName = fileUrl.split('/').pop();
+      console.log("Ancien fichier à supprimer:", oldFileName);
+
+      const { error: removeError } = await supabase.storage
+        .from('sujets')
+        .remove([oldFileName]);
+
+      if (removeError) {
+        console.error("Erreur suppression ancien fichier:", removeError);
+        throw removeError;
+      }
+    }
+
+    // Suppression du sujet en base
+    const suppression = await sujetModel.deleteSujet(idSujet);
+    res.status(200).json(suppression);
+
+  } catch (error) {
+    console.error("Erreur finale :", error);
+    res.status(500).json({ error: error.message });
+  }
 };
+
