@@ -20,3 +20,12 @@ export type User={
   email:string,
   role: string
 }
+
+export type Cours={
+  idcours:string,
+  nom: string,
+  prenom:string,
+  email:string,
+  nomcours: string
+}
+

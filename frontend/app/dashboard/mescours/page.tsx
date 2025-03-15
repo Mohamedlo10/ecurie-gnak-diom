@@ -1,6 +1,5 @@
 "use client";
 
-import { creerClient, getallclient, uploadFile } from "@/app/api/clients/query";
 import { Button } from "@/components/ui/button";
 
 import Drawer from '@mui/material/Drawer';
@@ -9,13 +8,14 @@ import { fr } from 'date-fns/locale';
 import { Plus } from "lucide-react";
 import { useRouter } from 'next/navigation';
 
-import { getSupabaseSession } from "@/lib/authMnager";
 import { ChangeEvent, CSSProperties, useEffect, useState } from "react";
 import BeatLoader from "react-spinners/BeatLoader";
 import { ToastContainer } from 'react-toastify';
-import { v4 as uuidv4 } from 'uuid';
 import { columns } from "./components/columns";
 import { DataTable } from "./components/data-table";
+import { getSupabaseUser } from "@/lib/authMnager";
+import { Cours, User } from "@/interface/type";
+import { getCoursByidEtudiant, getCoursByidProf } from "@/app/api/cours/query";
 
 const override: CSSProperties = {
   display: "block",
@@ -24,16 +24,14 @@ const override: CSSProperties = {
 };
 // Composant principal de la page des utilisateurs
 export default function Page() {
-  const [users, setUsers] = useState([]);
+  const [cours, setCours] = useState<Cours | any>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAddingClient, setIsAddingClient] = useState(false);
   let [color, setColor] = useState("#ffffff");
   const [currentPage, setCurrentPage] = useState(1);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [total, setTotal] = useState(0);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [client, setClient] = useState({
     prenom: "",
     nom: "",
@@ -53,34 +51,30 @@ export default function Page() {
 
     async function fetchData() {
       setIsLoading(true)
-      try {
-        const data: any = await getallclient()
-        if (data && data.length > 0) {
-          setUsers(data)
-          setTotal(data.length);
-         console.log(data)
-        }
-        const data3= getSupabaseSession()
-        if (data3 != null) {
-          if(data3.access_groups?.utilisateurs)
-            {
-              console.log("autoriser...")
-            }
-            else
-            {
-              router.push(`/dashboard`);
-            }
-            
-        
-      }
-        
-      } catch (error) {
-        console.error("Error fetching room details:", error)
-      } finally {
-        setIsLoading(false)
-      }
+        const user = getSupabaseUser()
+        try {
+          if(user.role=="etudiant"){
+            const data: any = await getCoursByidEtudiant(user.id)
+            if (data) {
+              console.log(data)
+              setCours(data)         
+            } 
+          }
+            else  if(user?.role=="professeur"){
+              const data: any = await getCoursByidProf(user.id)
+              if (data) {
+                console.log(data)
+                setCours(data)         
+              } 
+          }     
+              } catch (error) {
+                console.error("Error fetching user details:", error)
+              } finally {
+                setIsLoading(false)
+              }
+      
     }
-
+  
   useEffect(() => {
     fetchData()
   }, [])
@@ -91,29 +85,6 @@ export default function Page() {
     setClient({ ...client, [name]: value });
   };
 
-  const handleImageDelete = () => {
-    setUploadedImage(null);
-    setClient({ ...client, img_url: "" });
-  };
-
-
-
-
-  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files[0];
-  
-    if (file) {
-      // Étape 1: Lire le fichier pour l'afficher
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result as string); // Stocker l'URL de l'image téléchargée
-      };
-      reader.readAsDataURL(file);
-  
-      // Mettez à jour l'état avec le fichier d'origine
-      setUploadedFile(file);
-    }
-  };
   
 
 
@@ -122,29 +93,11 @@ export default function Page() {
    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true)
-    if (uploadedImage && uploadedFile) {
-      const fileName = `${Date.now()}_${uploadedFile.name}`;
-      let publicUrl;
-      try{
-        const data:any= await uploadFile(fileName,uploadedFile)
-        if(data != null){
-            publicUrl=data.publicUrl
-          }
-      }catch{
-        console.error("Erreur lors de l'obtention de l'url");
-        
-      }
+   
   
-
-      client.img_url=publicUrl;
-      client.id_client=uuidv4();
-    }
-  
-    // Après avoir géré le téléchargement de l'image et mis à jour l'URL
     try {
-    const response = await creerClient(client)
+    // const response = await creerClient(client)
 
-        // Réinitialiser le formulaire si nécessaire
         setClient({
           prenom: "",
           nom: "",
@@ -154,8 +107,7 @@ export default function Page() {
           img_url: "",
           id_client:""
         });
-        setUploadedImage(null);
-        setUploadedFile(null);
+
         setIsDrawerOpen(false);
         setSelectedUser(null);
         setIsAddingClient(false);
@@ -214,8 +166,8 @@ export default function Page() {
       <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
         <div className="flex items-center justify-between space-y-2">
           <div>
-            <h2 className="text-4xl font-extrabold tracking-tight">Clients</h2>
-            <p className="text-muted-foreground">Liste des Clients</p>
+            <h2 className="text-4xl font-extrabold tracking-tight text-zinc-400">Cours</h2>
+            <p className="text-muted-foreground text-black text-zinc-600 font-bold">Liste des Cours</p>
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -223,14 +175,14 @@ export default function Page() {
               className="w-fit h-10 font-bold bg-red-600"
               onClick={handleAddClientClick}
             >
-              <Plus /> Ajouter un Client
+              <Plus /> Ajouter un Cours
             </Button>
           </div>
         </div>
 
         {/* Tableau des données */}
         <DataTable 
-        data={users}
+        data={cours}
         columns={columns}
         onRowClick={handleUserClick}
         currentPage={currentPage} 
@@ -250,36 +202,7 @@ export default function Page() {
             <div className="flex w-full max-w-xl flex-col items-center border bg-white p-10 text-left">
               <h2 className="mb-8 text-2xl font-bold">Ajouter un Nouveau Client</h2>
               <form className="w-full" onSubmit={handleSubmit}>
-              <div className="flex flex-col justify-center mb-4 items-center">
-                  <label htmlFor="image" className="cursor-pointer flex flex-col items-center justify-center gap-1 relative">
-                    <img
-                      src={uploadedImage || 'https://i.pinimg.com/564x/11/d1/cf/11d1cf8094d0bf58d6bba80a0b2f5355.jpg'}
-                      alt="Cliquez pour télécharger une image"
-                      width={120}
-                      height={120}
-                      className=" h-44 w-44 opacity-60 hover:opacity-100 rounded-full object-cover"
-                    />
-                    <input
-                      type="file"
-                      id="image"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
-                    <span className="text-sm flex items-center justify-center font-bold text-gray-700">
-                    cliquez pour ajouter une photo
-                    </span>
-                  </label>
-                  {uploadedImage && (
-                    <Button
-                      type="button"
-                      onClick={handleImageDelete}
-                      className=" h-10 text-sm text-white bg-red-600 font-bold "
-                    >
-                      Supprimer l'image
-                    </Button>
-                  )}
-                </div>
+             
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-2">Prénom</label>
                   <input
