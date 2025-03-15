@@ -20,6 +20,8 @@ function Login() {
   let [color, setColor] = useState("#ffffff");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   // const [icon, setIcon] = useState(eyeOff);
   const [type, setType] = useState('password');
@@ -32,6 +34,23 @@ function Login() {
     role: "",
     ine: "",
   });
+  
+  const EmailValidity = (value:string) =>{
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+      return !emailRegex.test(value); 
+  }
+
+  const NonValide = (currentStep==0 && (user.nom=="" || user.prenom=="") ||
+  (currentStep==1 && (user.email=="" || user.motdepasse=="" || user.confirmPassword=="" || EmailValidity(user.email) || (user.motdepasse != user.confirmPassword))                           
+));
+  
+  const nextStep =() =>{
+    setCurrentStep(currentStep+1);
+  }
+
+  const backStep =() =>{
+    setCurrentStep(currentStep-1);
+  }
   
 
   const toggleAuthMode = () => {
@@ -68,8 +87,7 @@ function Login() {
       router.push(`/dashboard`);
     };
 
-    const handleAuth = async (e: ChangeEvent<HTMLFormElement>) => {
-      e.preventDefault();
+    const handleAuth = async () => {
       setIsLoading(true);
       setError('');
     
@@ -82,7 +100,6 @@ function Login() {
           console.log("Connexion réussie:", data);
     
           if (data) {
-            localStorage.setItem('role_user', JSON.stringify(data.role));
             localStorage.setItem('user_session', JSON.stringify(data.utilisateur));
             handleNavigation()         
           } 
@@ -138,20 +155,20 @@ function Login() {
     }
     
     return (
-      <div className="mx-auto grid text-white shadow-2xl h-fit p-4 px-20 w-2/3 rounded-sm gap-2">
+      <div className="mx-auto grid text-white shadow-2xl p-4 px-20  w-3/4 rounded-sm gap-2">
         <div className="grid gap-2 text-center">
           <h1 className="text-xl font-bold">
-            {isLogin ? "Login" : "Sign Up"}
+            {isLogin ? "Se connecter" : "S'inscrire"}
           </h1>
-          <p className="text-sm font-medium">
+          <p className="text-sm text-zinc-300">
             {isLogin
-              ? "Enter your email below to login to your account"
-              : "Create an account to get started"}
+              ? "Entrez votre email ci-dessous pour vous connecter à votre compte"
+              : "Creer un compte pour demarrer "}
           </p>
         </div>
   
-        <form onSubmit={handleAuth}  className="grid overflow-y-auto max-h-[80vh] gap-4">
-        {!isLogin&&(
+        <form   className="grid overflow-y-hidden max-h-[70vh] gap-4">
+        {(!isLogin && currentStep==0) &&(
           <>
           <div className="grid gap-2">
           <label htmlFor="nom">Nom</label>
@@ -183,7 +200,10 @@ function Login() {
         </>
         )}
 
-          <div className="grid gap-2">
+         {(currentStep==1 || isLogin)&&
+         (
+          <>
+           <div className="grid gap-2">
             <label htmlFor="email">Email</label>
             <input
               id="email"
@@ -198,17 +218,18 @@ function Login() {
           </div>
   
           <div className="grid gap-2">
-            <div className="flex items-center">
+             <div className="flex items-center">
               <label htmlFor="password">Password</label>
-              {isLogin && (
+              {/* {isLogin && (
                 <Link
                   href="/forgot-password"
                   className="ml-auto text-sm underline"
                 >
                   Forgot your password?
                 </Link>
-              )}
-            </div>
+              )} */}
+            </div> 
+           
   
             <div className="relative flex items-center">
               <input
@@ -229,11 +250,8 @@ function Login() {
               </span>
             </div>
           </div>
-  
-          {!isLogin && (
-            <>
-            
-            <div className="grid gap-2">
+
+          {!isLogin&&(<div className="grid gap-2">
               <label htmlFor="confirmPassword">Confirm Password</label>
               <div className="relative flex items-center">
                 <input
@@ -253,7 +271,18 @@ function Login() {
                   {showConfirmPassword ? <FiEyeOff size={24} /> : <FiEye size={24} />}
                 </span>
               </div>
-            </div>
+              {user.motdepasse!=user.confirmPassword &&(<span className="text-red-700">
+                Mot de passe different
+              </span>)}
+            </div>)}
+
+          </>
+            )}
+  
+          {(!isLogin && currentStep==2) && (
+            <>
+            
+
 
             <div className="grid gap-2">
               <label htmlFor="role">Role</label>
@@ -284,29 +313,64 @@ function Login() {
      required
    />
  </div>
+
+ 
 )
 
-}
-           
-         
+
+
+}      
 
           </>
           )}
   
-          <button
-            type="submit"
-            className="w-full h-13 cursor-pointer hover:bg-black mt-2 bg-red-800 text-white rounded-md"
-          >
-            {isLogin ? "Login" : "Sign Up"}
-          </button>
+          
         </form>
-  
-        <div className="mb-4 text-center text-sm">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-          <button onClick={toggleAuthMode} className="underline text-blue-400">
-            {isLogin ? "Sign up" : "Login"}
+        {(isLogin || currentStep==2) ? 
+          (<div className="flex flex-row gap-8">
+            
+                       {!isLogin &&( <button
+                        onClick={backStep}
+                        type="button"
+                        className="w-full h-13 cursor-pointer hover:bg-black mt-2 bg-zinc-100 text-black hover:text-white rounded-md"
+                      >
+                        Retour
+                      </button>)}
+
+                       <button
+                          type="submit"
+                          onClick={handleAuth}
+                          className="w-full h-13 cursor-pointer hover:bg-black mt-2 bg-red-800 text-white rounded-md"
+                        >
+                          {isLogin ? "Se connecter" : "S'inscrire"}
+                        </button>  
+
+          </div>
+         
+        ):(
+            <div className="flex flex-row gap-8">
+            <button
+            disabled={currentStep==0}
+                onClick={backStep}
+                className={`w-full h-13   mt-2 bg-zinc-100 text-black  rounded-md ${currentStep==0?"opacity-50":"opacity-100 hover:bg-black hover:text-white cursor-pointer"}`}
+              >
+                Retour
+              </button>
+            <button
+            disabled={NonValide}
+            onClick={nextStep}
+            className={`w-full h-13   mt-2 bg-zinc-100 text-black  rounded-md ${NonValide?"opacity-50":"opacity-100 hover:bg-black hover:text-white cursor-pointer"}`}
+          >
+            Suivant
           </button>
-        </div>
+          </div>
+          )}
+        <div className="mb-4 text-center text-sm">
+          {isLogin ? "Vous n'avez pas de compte ?" : "Vous avez déjà un compte ?"}{" "}
+          <button onClick={toggleAuthMode} className="underline cursor-pointer text-blue-400">
+          {isLogin ? "S'inscrire" :  "Se connecter"}
+          </button>
+        </div> 
       </div>
     );
   };

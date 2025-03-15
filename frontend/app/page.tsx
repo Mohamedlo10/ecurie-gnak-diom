@@ -8,13 +8,13 @@ import Image from "next/image"
       <div className="lg:flex items-center hidden h-full justify-center ">
         <Login/>
       </div>
-      <div className="hidden  lg:block">
+      <div className="hidden overflow-y-hidden lg:flex">
         <Image
           src="/logo.jpg"
           alt="Image"
-          width={890} 
-          height={890}
-          className="h-full w-full object-cover"
+          width={600} 
+          height={600}
+          className="w-full h-full object-cover"
         />
       </div>
       <div className="h-96 md:hidden flex items-center justify-center w-full text-2xl font-extrabold">

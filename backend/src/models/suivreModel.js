@@ -47,7 +47,6 @@ export const getEtudiantByIdCours = async (idcours) => {
                 etudiant.ine
             FROM suivre
             JOIN etudiant ON suivre.idutilisateur = etudiant.idutilisateur
-            JOIN utilisateur ON etudiant.idutilisateur = utilisateur.idutilisateur
             WHERE suivre.idcours = ${idcours};
         `;
         return query;

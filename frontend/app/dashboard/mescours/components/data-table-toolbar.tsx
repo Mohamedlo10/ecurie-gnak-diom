@@ -3,7 +3,7 @@
 import { Cross2Icon } from "@radix-ui/react-icons"
 import { Table } from "@tanstack/react-table"
 
-import { DataTableViewOptions } from "@/components/proprio_table/data-table-view-options"
+// import { DataTableViewOptions } from "@/components/proprio_table/data-table-view-options"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -22,9 +22,9 @@ export function DataTableToolbar<TData>({
       <div className="flex flex-1 space-x-4 items-center ">
         <Input
           placeholder="Rechercher client par Tel ..."
-          value={(table.getColumn("Tel")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("Tel")?.setFilterValue(event.target.value)
+            table.getColumn("email")?.setFilterValue(event.target.value)
           }
           className="h-8 w-[190px] lg:w-[320px]"
         />
@@ -41,7 +41,7 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      {/* <DataTableViewOptions table={table} /> */}
     </div>
   )
 }
