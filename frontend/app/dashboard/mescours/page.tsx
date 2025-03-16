@@ -17,6 +17,7 @@ const override: CSSProperties = {
   display: "block",
   margin: "0 auto",
   borderColor: "red", 
+  opacity:50
 };
 // Composant principal de la page des utilisateurs
 export default function Page() {
@@ -184,7 +185,7 @@ export default function Page() {
                   
                   <div 
                   key={cour.idcours}
-                  onClick={() => handleNavigation(cour.idcours)} className="h-fit border-1 rounded-2xl shadow-sm hover:bg-zinc-200 cursor-pointer w-[13vw] ">
+                  onClick={() => handleNavigation(cour.idcours)} className="h-fit border-1 rounded-2xl shadow-sm hover:bg-zinc-200 cursor-pointer w-[14vw] ">
                               
                   <div className="">
                       <div className="flex px-3 flex-col items-center justify-center py-4">
@@ -198,7 +199,10 @@ export default function Page() {
                           />
                         </div>
                         <div className="flex flex-col items-center justify-center  py-2">
-                        <div className="font-extrabold text-base">{cour.nomcours}</div>
+                        <div className="font-extrabold text-base w-full text-center truncate whitespace-nowrap max-w-[200px]">
+  {cour.nomcours.length > 20 ? `${cour.nomcours.slice(0, 20)}...` : cour.nomcours}
+</div>
+
                         
                       {user?.role=="etudiant"? (  <>
                         <div className="font-bold text-sm  text-zinc-400">Professeur</div>

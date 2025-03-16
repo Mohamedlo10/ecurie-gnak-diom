@@ -1,19 +1,11 @@
 "use client"
 
-import { DotsHorizontalIcon } from "@radix-ui/react-icons"
 import { Row } from "@tanstack/react-table"
 
-import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
+  DropdownMenu
 } from "@/components/ui/dropdown-menu"
 
-import { commandeSchema } from "@/app/dashboard/commandes/schema"
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -22,11 +14,11 @@ interface DataTableRowActionsProps<TData> {
 export function DataTableRowActions<TData>({
   row,
 }: DataTableRowActionsProps<TData>) {
-  const commande = commandeSchema.parse(row.original)
+  // const commande = Etudiant.parse(row.original)
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    {/*   <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
@@ -49,7 +41,7 @@ export function DataTableRowActions<TData>({
           Delete
           <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
         </DropdownMenuItem>
-      </DropdownMenuContent>
+      </DropdownMenuContent> */}
     </DropdownMenu>
   )
 }

@@ -3,9 +3,9 @@
 import { Cross2Icon } from "@radix-ui/react-icons"
 import { Table } from "@tanstack/react-table"
 
-import { DataTableViewOptions } from "@/components/proprio_table/data-table-view-options"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DataTableViewOptions } from "./data-table-view-options"
 
 
 interface DataTableToolbarProps<TData> {
@@ -21,10 +21,10 @@ export function DataTableToolbar<TData>({
     <div className="flex items-center justify-between">
       <div className="flex flex-1 space-x-4 items-center ">
         <Input
-          placeholder="Rechercher une commande ..."
-          value={(table.getColumn("annonce_client")?.getFilterValue() as string) ?? ""}
+          placeholder="Rechercher ..."
+          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("annonce_client")?.setFilterValue(event.target.value)
+            table.getColumn("email")?.setFilterValue(event.target.value)
           }
           className="h-8 w-[190px] lg:w-[320px]"
         />

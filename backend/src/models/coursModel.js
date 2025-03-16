@@ -20,7 +20,8 @@ export const getCoursById = async (idCours) => {
                 cours.nomcours, 
                 utilisateur.nom, 
                 utilisateur.prenom, 
-                utilisateur.email
+                utilisateur.email,
+                utilisateur.idutilisateur
         FROM cours
         JOIN professeur ON cours.idutilisateur = professeur.idutilisateur
         JOIN utilisateur ON professeur.idutilisateur = utilisateur.idutilisateur

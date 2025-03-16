@@ -2,18 +2,39 @@ import sql from "../config/db.js";
 
 // , , 
 // 
-export const addEtudiant = async (idcours, idutilisateur) => {
+export const addEtudiant = async (idcours, email) => {
     try {
+        const userQuery = await sql`
+            SELECT idutilisateur FROM utilisateur WHERE email = ${email};
+        `;
+
+        if (userQuery.length === 0) {
+            throw new Error("Utilisateur non trouvé");
+        }
+        const idutilisateur = userQuery[0].idutilisateur;
+
+        const etudiantQuery = await sql`
+            SELECT idutilisateur FROM etudiant WHERE idutilisateur = ${idutilisateur};
+        `;
+
+        if (etudiantQuery.length === 0) {
+            throw new Error("cet utilisateur n'est pas un etudiant");
+        }
+
+
+
         const query = await sql`
             INSERT INTO suivre (idcours, idutilisateur)
             VALUES (${idcours}, ${idutilisateur})
             RETURNING *;
-        `;  
-        return query[0]; 
+        `;
+
+        return query[0];
     } catch (error) {
-        throw new Error("Erreur lors de l'inscription de l'étudiant au cours");
+        throw new Error(`Erreur lors de l'inscription de l'étudiant au cours : ${error.message}`);
     }
 };
+
 
 export const getCoursByIdEtudiant = async (idutilisateur) => {
     try {

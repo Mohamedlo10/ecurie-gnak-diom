@@ -5,6 +5,7 @@ import { Cours } from "@/interface/type";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import BeatLoader from "react-spinners/BeatLoader";
+import EtudiantsInfo from "./etudiantsInfo/etudiantsInfo";
 import PersonalInfo from './personalInfo';
 
 const override: CSSProperties = {
@@ -145,14 +146,12 @@ const RecupInfo = () => {
               </div>
               <div className="flex flex-col sm:max-w-full max-w-44 ">
               <div className="text-lg md:text-3xl font-semibold sm:w-full w-36 tracking-tight leading-7 md:leading-snug truncate">
-                {cour?.prenom} {cour?.nom}
+                {cour?.nomcours}
                 </div>
-                <div className="flex justify-center flex-col gap-2 items-center">
-                  <div className="leading-7 truncate text-xl font-bold text-red-700">
-                  Professeur
-                  </div>
+              <div className="flex justify-center font-bold text-red-700 flex-col gap-2 items-center">
+              Pr. {cour?.prenom} {cour?.nom}
                 </div>
-                
+              
                 
               </div>
             </div>
@@ -164,7 +163,7 @@ const RecupInfo = () => {
       <div className="flex-auto border-t bg-white -mt-px">
         <div className="w-full max-w-screen-xl mx-auto">
           {/* Tabs */}
-          <div className="tabs flex flex-row gap-28 p-2 py-8 items-center justify-center">
+          <div className="tabs flex flex-row gap-28 p-2 pt-4 items-center justify-center">
             <Button
               className={` hover:text-white hover:bg-red-700 hover:opacity-100 transition-shadow font-bold tab ${activeTab === 0 ? "active bg-red-700 text-white" : " opacity-70 bg-white text-red-800"}`}
               onClick={() => setActiveTab(0)}
@@ -175,7 +174,13 @@ const RecupInfo = () => {
               className={` hover:text-white hover:bg-red-700 hover:opacity-100 transition-shadow font-bold tab ${activeTab === 1 ? "active bg-red-700 text-white" : " opacity-70 bg-white text-red-800"}`}
               onClick={() => setActiveTab(1)}
             >
-              Commandes
+              Liste de classe
+            </Button>
+            <Button
+              className={` hover:text-white hover:bg-red-700 hover:opacity-100 transition-shadow font-bold tab ${activeTab === 2 ? "active bg-red-700 text-white" : " opacity-70 bg-white text-red-800"}`}
+              onClick={() => setActiveTab(2)}
+            >
+              Liste des sujets
             </Button>
           
           </div>
@@ -189,7 +194,7 @@ const RecupInfo = () => {
             )}
              {activeTab === 1 && (
               <div>
-                {/* <CommandeInfo coursId={cour?.idcours} /> */}
+                <EtudiantsInfo coursId={cour?.idcours} />
               </div>
             )}
           </div>
