@@ -28,13 +28,18 @@
 
 
 
-  export const suprimerCours = async (idCours: string) => {
+  export const supprimerEtudiantInCours = async (idCours: string,idutilisateur:string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BACK}/api/cours/${idCours}`,
+        `${process.env.NEXT_PUBLIC_URL_BACK}/api/suivre`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idCours, idutilisateur }),
         }
+        
       );
   
       if (!response.ok) {
@@ -44,7 +49,7 @@
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Erreur lors de la suppression du cours:", error);
+      console.error("Erreur lors du retrait de l'eleve:", error);
       throw error; // Pour gérer l'erreur dans `handleAuth`
     }
   };
