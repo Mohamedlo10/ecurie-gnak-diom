@@ -33,3 +33,11 @@ export type Cours={
   nomcours: string
 }
 
+
+
+export type Sujet={
+  idsujet: string,
+  idcours:string,
+  nomsujet:string,
+  urlsujet:string,
+}

@@ -7,6 +7,7 @@ import { CSSProperties, useEffect, useRef, useState } from "react";
 import BeatLoader from "react-spinners/BeatLoader";
 import EtudiantsInfo from "./etudiantsInfo/etudiantsInfo";
 import PersonalInfo from './personalInfo';
+import SujetsInfo from "./sujetsInfo/sujetsInfo";
 
 const override: CSSProperties = {
   display: "block",
@@ -195,6 +196,11 @@ const RecupInfo = () => {
              {activeTab === 1 && (
               <div>
                 <EtudiantsInfo coursId={cour?.idcours} />
+              </div>
+            )}
+             {activeTab === 2 && (
+              <div>
+                <SujetsInfo coursId={cour?.idcours} />
               </div>
             )}
           </div>

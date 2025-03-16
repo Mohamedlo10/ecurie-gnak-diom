@@ -2,7 +2,7 @@
 import React, { ChangeEvent } from 'react';
 
 import { Button } from "@/components/ui/button";
-import { Cours, User } from "@/interface/type";
+import {  Sujet, User } from "@/interface/type";
 import { getSupabaseUser } from "@/lib/authMnager";
 import Drawer from '@mui/material/Drawer';
 import { Plus } from "lucide-react";
@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { CSSProperties, useEffect, useState } from "react";
 import BeatLoader from "react-spinners/BeatLoader";
 import { ToastContainer } from 'react-toastify';
+import { getSujetByidCours } from '@/app/api/sujet/query';
 
 
 const override: CSSProperties = {
@@ -18,59 +19,63 @@ const override: CSSProperties = {
   borderColor: "red",
 };
 
-type EtudiantsInfoProps = {
+type SujetsInfoProps = {
   coursId: string | null | undefined;
 };
 
-const EtudiantsInfo: React.FC<EtudiantsInfoProps> = ({ coursId }) => {
+const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
 
-    const [cours, setCours] = useState<Cours | any>([]);
+    const [sujets, setsujets] = useState<Sujet | any>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedCours, setSelectedCours] = useState<any | null>(null);
+    const [selectedsujet, setSelectedsujet] = useState<any | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [isAddingCours, setIsAddingCours] = useState(false);
+    const [isAddingsujet, setIsAddingsujet] = useState(false);
     let [color, setColor] = useState("#ffffff");
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
-    const [cour, setcour] = useState({
-      nomcours:""
+    const [sujet, setsujet] = useState({
+      nomsujet:""
     });
     const router = useRouter();
     const [user, setUser] = useState<User>();
     const [searchTerm, setSearchTerm] = useState('');
-      const handleNavigation = (idcours:string) => {
-        // Par exemple, naviguer vers la page de profil en passant l'ID de l'utilisateur en paramètre
-        router.push(`/dashboard/mescours/profile?id=${idcours}`);
+    const [file, setFile] = useState<File | null>(null);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.files) {
+        setFile(event.target.files[0]);
+      }
+    };
+  
+      const handleNavigation = (idsujet:string) => {
+        router.push(`/dashboard/messujet/profile?id=${idsujet}`);
       };
     
-      const filteredcours = cours.filter((cour:Cours) =>
-        cour.nomcours.toLowerCase().includes(searchTerm.toLowerCase())
+      const filteredsujet = sujets.filter((sujet:Sujet) =>
+        sujet.nomsujet.toLowerCase().includes(searchTerm.toLowerCase())
       );
+
+      const handleRemoveFile = () => {
+        setFile(null); 
+      };
   
       async function fetchData() {
         setIsLoading(true)
           const user = getSupabaseUser()
           setUser(user)
-        //   try {
-        //     if(user.role=="etudiant"){
-        //       const data: any = await getCoursByidEtudiant(user.idutilisateur)
-        //       if (data) {
-        //         console.log(data)
-        //         setCours(data)         
-        //       } 
-        //     }
-        //       else  if(user?.role=="professeur"){
-        //         const data: any = await getCoursByidProf(user.idutilisateur)
-        //         if (data) {
-        //           console.log(data)
-        //           setCours(data)         
-        //         } 
-        //     }     
-        //         } catch (error) {
-        //           console.error("Error fetching user details:", error)
-        //         } finally {
-        //           setIsLoading(false)
-        //         }
+          try {
+            if(coursId){
+              const data: any = await getSujetByidCours(coursId)
+              if (data) {
+                console.log(data)
+                setsujet(data)         
+              } 
+            }     
+                } catch (error) {
+                  console.error("Error fetching user details:", error)
+                } finally {
+                  setIsLoading(false)
+                }
         
       }
     
@@ -81,7 +86,7 @@ const EtudiantsInfo: React.FC<EtudiantsInfoProps> = ({ coursId }) => {
   
     const handleInputChange = (e : ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
-      setcour({ ...cour, [name]: value });
+      setsujet({ ...sujet, [name]: value });
     };
   
     
@@ -102,14 +107,14 @@ const EtudiantsInfo: React.FC<EtudiantsInfoProps> = ({ coursId }) => {
     if(user?.idutilisateur)
     {
       try {
-        // const response = await creerCours(cour.nomcours,user?.idutilisateur)
+        // const response = await creersujet(cour.nomsujet,user?.idutilisateur)
     
-            setcour({
-              nomcours:""
+        setsujet({
+              nomsujet:""
             });
     
             setIsDrawerOpen(false);
-            setIsAddingCours(false);
+            setIsAddingsujet(false);
             fetchData();
           setIsLoading(false)
           /*   toast.success(`Client ajouté avec succès: ${newClient.prenom}`);
@@ -126,14 +131,14 @@ const EtudiantsInfo: React.FC<EtudiantsInfoProps> = ({ coursId }) => {
     }
      
   
-    const handleAddCoursClick = () => {
-      setIsAddingCours(true);
+    const handleAddsujetClick = () => {
+      setIsAddingsujet(true);
       setIsDrawerOpen(true);
     };
   
     const closeDrawer = () => {
       setIsDrawerOpen(false);
-      setIsAddingCours(false);
+      setIsAddingsujet(false);
     };
   
     if (isLoading) {
@@ -155,20 +160,20 @@ const EtudiantsInfo: React.FC<EtudiantsInfoProps> = ({ coursId }) => {
   
     return (
       <>
-        <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
+        <div className="hidden h-full flex-1 flex-col space-y-8 py-6 px-10  md:flex">
           <div className="flex items-center justify-between ">
             <div>
-              <h2 className="text-4xl font-extrabold tracking-tight text-zinc-400">Cours</h2>
-              <p className=" text-zinc-600 font-bold">Liste des Cours</p>
+              <h2 className="text-4xl font-extrabold tracking-tight text-zinc-400">sujet</h2>
+              <p className=" text-zinc-600 font-bold">Liste des sujet</p>
             </div>
             <div className={`flex items-center space-x-2 ${user?.role=="etudiant"?"opacity-0":"opacity-100"}`}>
               <Button
                 type="button"
                 disabled={user?.role=="etudiant"}
                 className="w-fit h-10 cursor-pointer font-bold bg-red-600"
-                onClick={handleAddCoursClick}
+                onClick={handleAddsujetClick}
               >
-                <Plus /> Ajouter un Cours
+                <Plus /> Ajouter un sujet
               </Button>
             </div>
           </div>
@@ -183,12 +188,12 @@ const EtudiantsInfo: React.FC<EtudiantsInfoProps> = ({ coursId }) => {
                     className="ml-3 w-full border-none bg-transparent font-quick text-sm text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-0"/>
             </div>
   
-      {filteredcours.length>0 ?(<div className="pl-12 pt-8 h-[53vh] overflow-y-auto grid grid-cols-5">
-      {filteredcours.map((cour:Cours)=>(
+      {filteredsujet.length>0 ?(<div className="pl-12 pt-8 h-[30vh] overflow-y-auto grid grid-cols-5">
+      {filteredsujet.map((sujet:Sujet)=>(
                     
                     <div 
-                    key={cour.idcours}
-                    onClick={() => handleNavigation(cour.idcours)} className="h-fit border-1 rounded-2xl shadow-sm hover:bg-zinc-200 cursor-pointer w-[14vw] ">
+                    key={sujet.idsujet}
+                    onClick={() => handleNavigation(sujet.idsujet)} className="h-fit border-1 rounded-2xl shadow-sm hover:bg-zinc-200 cursor-pointer w-[14vw] ">
                                 
                     <div className="">
                         <div className="flex px-3 flex-col items-center justify-center py-4">
@@ -203,13 +208,13 @@ const EtudiantsInfo: React.FC<EtudiantsInfoProps> = ({ coursId }) => {
                           </div>
                           <div className="flex flex-col items-center justify-center  py-2">
                           <div className="font-extrabold text-base w-full text-center truncate whitespace-nowrap max-w-[200px]">
-    {cour.nomcours.length > 20 ? `${cour.nomcours.slice(0, 20)}...` : cour.nomcours}
-  </div>
+                            {sujet.nomsujet.length > 20 ? `${sujet.nomsujet.slice(0, 20)}...` : sujet.nomsujet}
+                          </div>
   
                           
                         {user?.role=="etudiant"? (  <>
-                          <div className="font-bold text-sm  text-zinc-400">Professeur</div>
-                            <div className="font-bold text-sm">{cour.prenom} {cour.nom}</div>
+                          <div className="font-bold text-sm  text-zinc-400">Nom sujet</div>
+                            <div className="font-bold text-sm">{sujet.nomsujet} </div>
                           </>):(
                           <div className="font-bold text-sm  text-zinc-400">Moi</div>
   
@@ -227,37 +232,68 @@ const EtudiantsInfo: React.FC<EtudiantsInfoProps> = ({ coursId }) => {
                   ))}
   
       </div>):(
-        <div className="h-[53vh] w-full flex items-center justify-center text-xl text-zinc-500 font-bold">Pas de cours</div>
+        <div className="h-[30vh] w-full flex items-center justify-center text-xl text-zinc-500 font-bold">Pas de sujet</div>
       )}
         
-        <div className=" flex items-center justify-end text-sm text-zinc-500 font-bold">Nombre de cours : {filteredcours.length}</div>
+        <div className=" flex items-center justify-end text-sm text-zinc-500 font-bold">Nombre de sujet : {filteredsujet.length}</div>
          
         </div>
   
         <Drawer anchor='right' open={isDrawerOpen} onClose={closeDrawer}>
           <div className="p-4 flex items-center h-[100vh] w-[32vw]">
-            {isAddingCours &&(
-              // Formulaire d'ajout de cour
+            {isAddingsujet &&(
               <div className="flex w-full max-w-xl flex-col items-center border bg-white p-10 text-left">
-                <h2 className="mb-8 text-2xl font-bold">Ajouter un Nouveau Cours</h2>
+                <h2 className="mb-8 text-2xl font-bold">Ajouter un Nouveau sujet</h2>
                 <form className="w-full" onSubmit={handleSubmit}>
                
                   <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">Nom du cours</label>
+                    <label className="block text-sm font-medium mb-2">Nom du sujet</label>
                     <input
                         type="text"
-                        name="nomcours"
-                        value={cour.nomcours}
+                        name="nomsujet"
+                        value={sujet.nomsujet}
                         onChange={handleInputChange}
-                        placeholder="Nom du cours"
+                        placeholder="Nom du sujet"
                         className="border p-2 rounded w-full"
                         required
                       />
                   </div>
+                  <div className="w-full items-center justify-center flex flex-col gap-1">
+                  {!file && (
+                    <>
+                    <label htmlFor="file" className="cursor-pointer">
+                      <img
+                        src="/logo.jpg"
+                        alt="Télécharger un fichier"
+                        className="w-24 h-24 rounded-full" 
+                      />
+                    </label>
+                    <input
+                      type="file"
+                      id="file"
+                      className="hidden" 
+                      onChange={handleFileChange}
+                    />
+                    <div>Appuyer pour upload un fichier</div>
+                    </>
+                  )}
+                    {file && (
+                      <div className="mt-2 text-center">
+                        <p className='font-bold text-sm text-green-500'>Fichier sélectionné : {file.name}</p>
+                        <button
+                          type="button"
+                          onClick={handleRemoveFile}
+                          className="bg-red-500 text-white cursor-pointer rounded px-2 py-2 mt-5"
+                        >
+                          Supprimer le fichier
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   
                 
                   <div className="ml-auto pt-8 w-full items-center justify-center flex font-medium">
-                    <Button type="submit"  className="w-fit h-10 font-bold">Ajouter le cours</Button>
+                    <Button type="submit"  className="w-fit h-10 font-bold">Ajouter le sujet</Button>
                   </div>
                 </form>
                 <ToastContainer />
@@ -270,7 +306,7 @@ const EtudiantsInfo: React.FC<EtudiantsInfoProps> = ({ coursId }) => {
 
 }
 
-export default EtudiantsInfo
+export default SujetsInfo
 
   
 

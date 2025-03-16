@@ -72,7 +72,7 @@ const deleteUser = async () => {
 
 
   return <div>
-            <div className='p-3 bg-zinc-50 rounded-md w-full items-center justify-start flex flex-col gap-1'>  
+            <div className='p-8 mt-6 bg-zinc-50 rounded-md w-full  items-center justify-start flex flex-col gap-1'>  
             <div className="flex flex-col  max-h-[40vh]">
 
      
