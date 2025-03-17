@@ -42,5 +42,6 @@ export type Sujet={
   idcours:string,
   nomsujet:string,
   urlsujet:string,
-  created_at:string
+  created_at:string,
+  dateSoumission:string
 }

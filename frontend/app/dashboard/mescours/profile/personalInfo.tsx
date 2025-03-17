@@ -144,7 +144,10 @@ const deleteUser = async () => {
                 <div className="text-gray-500 text-sm sm:text-base">Mail du professeur</div>
                 <div className="leading-6 mt-1 text-sm sm:text-base font-bold">{cour?.email}</div>
               </div>
-              
+              <div className="mb-4">
+                <div className="text-gray-500 text-sm sm:text-base">Date de creation</div>
+                <div className="leading-6 mt-1 text-sm sm:text-base font-bold">{new Date(cour?.created_at as string).toLocaleString()}</div>
+              </div>           
             </div>
 
           </div>

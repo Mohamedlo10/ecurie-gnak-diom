@@ -1,13 +1,12 @@
-import sql from '../config/db.js';
-import * as sujetModel from "../models/sujetModel.js";
 import supabase from "../config/supabase.js";
+import * as sujetModel from "../models/sujetModel.js";
 
 
 export const createSujet = async (req, res) => {
   try {
-      const { nomSujet, idCours } = req.body;
+      const { nomSujet, idCours,dateSoumission } = req.body;
       const file = req.file;
-      const sujet = await sujetModel.createSujet(nomSujet, '', idCours);
+      const sujet = await sujetModel.createSujet(nomSujet, '', idCours,dateSoumission);
       const fileName = sujet.idsujet; 
 
       const { error } = await supabase.storage
@@ -36,7 +35,7 @@ export const getSujetById = async (req, res) => {
 export const updateSujet = async (req, res) => {
   try {
     const { idSujet } = req.params;
-    const { nomSujet } = req.body;
+    const { nomSujet,dateSoumission } = req.body;
     const file = req.file;
 
     let sujet = await sujetModel.getSujetById(idSujet);

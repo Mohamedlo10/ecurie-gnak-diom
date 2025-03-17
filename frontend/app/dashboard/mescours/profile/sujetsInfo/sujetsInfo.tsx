@@ -7,7 +7,7 @@ import { Sujet, User } from "@/interface/type";
 import { getSupabaseUser } from "@/lib/authMnager";
 import Drawer from '@mui/material/Drawer';
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { Plus, Trash, Trash2 } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { CSSProperties, useEffect, useState } from "react";
 import BeatLoader from "react-spinners/BeatLoader";
@@ -30,7 +30,7 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
 
     const [sujets, setsujets] = useState<Sujet | any>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedsujet, setSelectedsujet] = useState<any | null>(null);
+    const [selectedsujet, setSelectedsujet] = useState<Sujet | any>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isAddingsujet, setIsAddingsujet] = useState(false);
     let [color, setColor] = useState("#ffffff");
@@ -66,7 +66,7 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
     };
    
       const handleNavigation = (idsujet:string) => {
-        router.push(`/dashboard/messujet/profile?id=${idsujet}`);
+        router.push(`/dashboard/sujet?id=${idsujet}`);
       };
     
       const filteredsujets = sujets.filter((sujet:Sujet) =>
@@ -110,10 +110,14 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
     
 
     const deleteSujet = async (idSujet:string) => {
+      setIsLoading(true)
+
         try{
           const response = await supprimerSujet(idSujet)
           console.log("Suppression reussi")
           fetchData();
+          setIsLoading(false)
+
           closeDrawer();
       
         }catch(error)
@@ -142,7 +146,7 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
         setsujet({
               nomsujet:""
             });
-    
+            handleRemoveFile();
             setIsDrawerOpen(false);
             setIsAddingsujet(false);
             fetchData();
@@ -197,7 +201,7 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
                 className="w-fit h-10 cursor-pointer text-sm font-bold bg-red-700"
                 onClick={handleAddsujetClick}
               >
-                <Plus /> Ajouter un Etudiant
+                <Plus /> Ajouter un Sujet
               </Button>
   
       </div>)}
@@ -229,8 +233,8 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
                                          Sujet
                                        </div>
                                            <Avatar className="hidden h-28 w-28  sm:flex">
-                                           <AvatarImage src="/utilisateur.png" className="rounded-full object-cover w-full h-full" alt="Avatar" />
-                                           <AvatarFallback>client</AvatarFallback>
+                                           <AvatarImage src="/evaluation.png" className="rounded-full object-cover w-full h-full" alt="Avatar" />
+                                           <AvatarFallback>sujet</AvatarFallback>
                                            </Avatar>
                                            <div className="grid gap-1">
                                            <p className="text-base font-bold leading-none text-red-700">
@@ -246,15 +250,45 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
                        <div className="pt-8 px-2 lg:px-2 xl:px-2 w-full grid items-center gap-0 justify-center grid-cols-2">
                          <div className="flex flex-col w-full col-span-2 gap-2 ">
                          <div className="text-base grid grid-cols-1 gap-auto items-center justify-center font-bold w-full mt-4">
-                             <div className="line-clamp-2 flex flex-row gap-12 p-1 font-bold text-base text-muted-foreground">INE: </div>
+                             <div className="line-clamp-2 flex flex-row gap-12 p-1 font-bold text-base text-muted-foreground">Nom du sujet: </div>
                              <div className="text-base text-red-700 flex items-start w-full justify-start">
                              {selectedsujet?.nomsujet}
                              </div>
                            </div>
                            <div className="text-base grid grid-cols-1 gap-auto items-center justify-center font-bold  w-full mt-4">
-                             <div className="line-clamp-2 flex flex-row gap-2 p-1 font-bold text-base text-muted-foreground">Mail: </div>
-                             <div className="text-base text-red-700 flex items-start w-full justify-start">
-                             {selectedsujet?.url}
+                             <div className="line-clamp-2 flex flex-row gap-2 p-1 font-bold text-base text-muted-foreground">Date de creation: </div>
+                             <div className="text-base text-red-700 line-clamp-3 flex items-start w-full justify-start">
+                             {selectedsujet?.created_at &&
+                                new Date(selectedsujet.created_at as string).toLocaleDateString("fr-FR", {
+                                  day: "2-digit",
+                                  month: "long",
+                                  year: "numeric",
+                                }) +
+                                " à " +
+                                new Date(selectedsujet.created_at as string).toLocaleTimeString("fr-FR", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  second: "2-digit",
+                                })}
+
+                             </div>
+                           </div>
+                           <div className="text-base grid grid-cols-1 gap-auto items-center justify-center font-bold  w-full mt-4">
+                             <div className="line-clamp-2 flex flex-row gap-2 p-1 font-bold text-base text-muted-foreground">Date limite de soumission: </div>
+                             <div className="text-base text-red-700 line-clamp-3 flex items-start w-full justify-start">
+                             {selectedsujet?.dateSoumission &&
+                                  new Date(selectedsujet.dateSoumission as string).toLocaleDateString("fr-FR", {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                  }) +
+                                  " à " +
+                                  new Date(selectedsujet.dateSoumission as string).toLocaleTimeString("fr-FR", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit",
+                                  })}
+
                              </div>
                            </div>
                          </div>
@@ -266,14 +300,14 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
                            
                            </div>
                            <div className="ml-auto pt-24 w-full items-center justify-center flex font-medium">
-                           {user?.role=="professeur" &&(<div className="w-full flex justify-end items-end px-10">
+                           {user?.role=="professeur" &&(<div className="w-full flex justify-center items-center px-10">
                               <Button
                                         type="button"
                                         disabled={user?.role!="professeur"}
-                                        className="w-fit h-10 cursor-pointer text-sm font-bold bg-red-700"
-                                      onClick={() => deleteSujet(selectedsujet.idSujet)}
+                                        className="w-fit h-10 cursor-pointer text-sm font-bold bg-black"
+                                      onClick={() => handleNavigation(selectedsujet?.idsujet)}
                                       >
-                                        <Trash2 /> Retirer cet etudiant
+                                         Voir details
                                       </Button>
                                       </div>
                                       )}
@@ -354,33 +388,3 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
 
 export default SujetsInfo
 
-  /* 
-    <div className="flex items-center justify-between ">
-            <div>
-              <h2 className="text-4xl font-extrabold tracking-tight text-zinc-400">sujet</h2>
-              <p className=" text-zinc-600 font-bold">Liste des sujet</p>
-            </div>
-            <div className={`flex items-center space-x-2 ${user?.role=="etudiant"?"opacity-0":"opacity-100"}`}>
-              <Button
-                type="button"
-                disabled={user?.role=="etudiant"}
-                className="w-fit h-10 cursor-pointer font-bold bg-red-600"
-                onClick={handleAddsujetClick}
-              >
-                <Plus /> Ajouter un sujet
-              </Button>
-            </div>
-          </div>
-  
-  */
-
-   /* 
-   
-   <Drawer anchor='right' open={isDrawerOpen} onClose={closeDrawer}>
-          <div className="p-4 flex items-center h-[100vh] w-[32vw]">
-            {isAddingsujet &&(
-
-            )}
-          </div>
-        </Drawer>
-   */
