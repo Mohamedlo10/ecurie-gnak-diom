@@ -6,11 +6,12 @@ export const getSujetByidCours = async (idCours:string) => {
     return res.json();
   };
 
-  export const creerSujet = async (nomSujet: string, idCours: string, file: File) => {
+  export const creerSujet = async (nomSujet: string, idCours: string, file: File,datesoumission:string) => {
     try {
       const formData = new FormData();
       formData.append('nomSujet', nomSujet);
       formData.append('idCours', idCours);
+      formData.append('datesoumission', datesoumission);
       formData.append('file', file);
   
       const response = await fetch(

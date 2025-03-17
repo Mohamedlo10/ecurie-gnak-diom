@@ -43,5 +43,5 @@ export type Sujet={
   nomsujet:string,
   urlsujet:string,
   created_at:string,
-  dateSoumission:string
+  datesoumission:string
 }

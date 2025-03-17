@@ -37,7 +37,8 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [sujet, setsujet] = useState({
-      nomsujet:""
+      nomsujet:"",
+      datesoumission:""
     });
     const router = useRouter();
     const [user, setUser] = useState<User>();
@@ -141,10 +142,11 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
     if(coursId && file)
     {
       try {
-        const response = await creerSujet(sujet.nomsujet,coursId,file)
+        const response = await creerSujet(sujet.nomsujet,coursId,file,sujet.datesoumission)
     
         setsujet({
-              nomsujet:""
+              nomsujet:"",
+              datesoumission:""
             });
             handleRemoveFile();
             setIsDrawerOpen(false);
@@ -160,6 +162,8 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
           } */
         } catch (error) {
           console.error("Erreur lors de l'ajout du client:", error);
+          setIsLoading(false)
+
         }
       }; 
     }
@@ -276,14 +280,14 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
                            <div className="text-base grid grid-cols-1 gap-auto items-center justify-center font-bold  w-full mt-4">
                              <div className="line-clamp-2 flex flex-row gap-2 p-1 font-bold text-base text-muted-foreground">Date limite de soumission: </div>
                              <div className="text-base text-red-700 line-clamp-3 flex items-start w-full justify-start">
-                             {selectedsujet?.dateSoumission &&
-                                  new Date(selectedsujet.dateSoumission as string).toLocaleDateString("fr-FR", {
+                             {selectedsujet?.datesoumission &&
+                                  new Date(selectedsujet.datesoumission as string).toLocaleDateString("fr-FR", {
                                     day: "2-digit",
                                     month: "long",
                                     year: "numeric",
                                   }) +
                                   " à " +
-                                  new Date(selectedsujet.dateSoumission as string).toLocaleTimeString("fr-FR", {
+                                  new Date(selectedsujet.datesoumission as string).toLocaleTimeString("fr-FR", {
                                     hour: "2-digit",
                                     minute: "2-digit",
                                     second: "2-digit",
@@ -299,11 +303,10 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
                          
                            
                            </div>
-                           <div className="ml-auto pt-24 w-full items-center justify-center flex font-medium">
-                           {user?.role=="professeur" &&(<div className="w-full flex justify-center items-center px-10">
+                           <div className="ml-auto pt-14 w-full items-center justify-center flex font-medium">
+                           {(<div className="w-full flex justify-center items-center px-10">
                               <Button
                                         type="button"
-                                        disabled={user?.role!="professeur"}
                                         className="w-fit h-10 cursor-pointer text-sm font-bold bg-black"
                                       onClick={() => handleNavigation(selectedsujet?.idsujet)}
                                       >
@@ -331,6 +334,17 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
                         className="border p-2 rounded w-full"
                         required
                       />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Date limite de soumission</label>
+                    <input
+                      type="date"
+                      name="datesoumission"
+                      value={sujet.datesoumission || ""}
+                      onChange={handleInputChange}
+                      className="border p-2 rounded w-full"
+                      required
+                    />
                   </div>
                   <div className="w-full items-center justify-center flex flex-col gap-1">
                   {!file && (
@@ -373,7 +387,7 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
                   
                 
                   <div className="ml-auto pt-8 w-full items-center justify-center flex font-medium">
-                    <Button type="submit"  className="w-fit h-10 font-bold">Ajouter le sujet</Button>
+                    <Button type="submit" disabled={!file || sujet.datesoumission=="" || sujet.nomsujet==""} className="w-fit h-10 font-bold">Ajouter le sujet</Button>
                   </div>
                 </form>
                 <ToastContainer />

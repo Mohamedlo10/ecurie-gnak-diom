@@ -10,7 +10,7 @@ export const columns: ColumnDef<Sujet>[] = [
       <DataTableColumnHeader column={column} className="ml-28" title="nomsujet" />
     ),
     cell: ({ row }) => (
-      <div className="w-[120px] ml-24 font-bold">{row.getValue("nomsujet") as string}</div>
+      <div className="w-[200px] ml-24 font-bold">{row.getValue("nomsujet") as string}</div>
     ),
   },
  /*  {
@@ -49,20 +49,20 @@ export const columns: ColumnDef<Sujet>[] = [
     ),
   },
   {
-    accessorKey: "dateSoumission",
+    accessorKey: "datesoumission",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Date limite de soumission" />
     ),
     cell: ({ row }) => (
       <span>
        {
-        new Date(row.getValue("dateSoumission") as string).toLocaleDateString("fr-FR", {
+        new Date(row.getValue("datesoumission") as string).toLocaleDateString("fr-FR", {
           day: "2-digit",
           month: "long",
           year: "numeric",
         }) +
         " à " +
-        new Date(row.getValue("dateSoumission") as string).toLocaleTimeString("fr-FR", {
+        new Date(row.getValue("datesoumission") as string).toLocaleTimeString("fr-FR", {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
