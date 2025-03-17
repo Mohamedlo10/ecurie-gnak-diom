@@ -1,4 +1,3 @@
-// backend/src/routes/copieRoutes.js
 import { Router } from 'express';
 import multer from 'multer';
 import * as copieController from '../controllers/copieController.js';
@@ -15,3 +14,5 @@ router.put('/:idcopie', upload.single('file'), copieController.updateCopie);
 router.delete('/:idcopie', copieController.deleteCopie);
 
 export default router;
+
+

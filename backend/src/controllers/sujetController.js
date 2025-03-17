@@ -1,4 +1,3 @@
-import sql from '../config/db.js';
 import * as sujetModel from "../models/sujetModel.js";
 import supabase from "../config/supabase.js";
 

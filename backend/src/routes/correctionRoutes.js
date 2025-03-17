@@ -1,17 +1,17 @@
-import express from 'express';
-import {
-    // deleteCorrection,
-    generateCorrection,
-    // getAllCorrections,
-    getCorrectionById,
-} from '../controllers/correctionController.js';
+import { Router } from 'express';
+import multer from 'multer';
+import * as correctionController from '../controllers/correctionController.js';
 
-const router = express.Router();
 
-// router.get('/', getAllCorrections); 
-router.get('/:id', getCorrectionById); 
-router.post('/', generateCorrection); 
-// router.put('/:id', updateCorrection); 
-// router.delete('/:id', deleteCorrection); 
+// Configuration de Multer (stockage en mémoire)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+const router = Router();
 
-export default router; 
+router.post('/generate/:idSujet', correctionController.generateCorrection);
+router.get('/sujet/:idSujet', correctionController.getCorrectionByIdSujet);
+router.get('/:idCorrection', correctionController.getCorrectionById);
+router.put('/:idCorrection', upload.single('file'), correctionController.modifierCorrection);
+router.delete('/:idCorrection', correctionController.supprimerCorrection);
+
+export default router;
