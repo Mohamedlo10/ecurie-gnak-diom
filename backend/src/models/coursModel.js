@@ -18,6 +18,7 @@ export const getCoursById = async (idCours) => {
         SELECT 
                 cours.idCours, 
                 cours.nomcours, 
+                cours.created_at, 
                 utilisateur.nom, 
                 utilisateur.prenom, 
                 utilisateur.email,

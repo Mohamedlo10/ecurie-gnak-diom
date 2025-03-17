@@ -33,3 +33,24 @@ export const getSujetByidCours = async (idCours:string) => {
     }
   };
   
+
+  export const supprimerSujet = async (idSujet: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_BACK}/api/sujet/${idSujet}`,
+        {
+          method: "DELETE",
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Erreur lors de la suppression du sujet:", error);
+      throw error; // Pour gérer l'erreur dans `handleAuth`
+    }
+  };

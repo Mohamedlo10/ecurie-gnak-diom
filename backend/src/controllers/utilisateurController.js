@@ -84,6 +84,7 @@ export const loginUtilisateur = async (req, res) => {
                 nom: utilisateur.nom,
                 prenom: utilisateur.prenom,
                 email: utilisateur.email,
+                created_at: utilisateur.created_at,
                 role
             },
             redirectURL

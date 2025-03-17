@@ -18,7 +18,8 @@ export type User={
   nom: string,
   prenom:string,
   email:string,
-  role: string
+  role: string,
+  created_at:string
 }
 
 export type Etudiant = User & {
@@ -30,7 +31,8 @@ export type Cours={
   nom: string,
   prenom:string,
   email:string,
-  nomcours: string
+  nomcours: string,
+  created_at:string
 }
 
 
@@ -40,4 +42,5 @@ export type Sujet={
   idcours:string,
   nomsujet:string,
   urlsujet:string,
+  created_at:string
 }
