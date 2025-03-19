@@ -25,7 +25,7 @@ app.use(cors());
 (async () => {
   try {
     await sql`SELECT 1`;
-    console.log(process.env.JWT_SECRET);
+    // console.log(process.env.JWT_SECRET);
     console.log("✅ Connexion à PostgreSQL réussie !");
   } catch (error) {
     console.error("❌ Erreur de connexion à PostgreSQL :", error);

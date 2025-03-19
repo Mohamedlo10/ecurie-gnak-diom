@@ -45,8 +45,8 @@ export const loginUtilisateur = async (req, res) => {
         if (!utilisateur) {
             return res.status(400).json({ message: 'Identifiants invalides' });
         }
-        console.log("Mot de passe fourni :", motdepasse);
-        console.log("Mot de passe stocké (hashé) :", utilisateur.motdepasse);
+        // console.log("Mot de passe fourni :", motdepasse);
+        // console.log("Mot de passe stocké (hashé) :", utilisateur.motdepasse);
 
         // Vérifier le mot de passe avec bcrypt (SANS REHASHER)
         const isMatch = await bcrypt.compare( motdepasse, utilisateur.motdepasse);
@@ -57,7 +57,7 @@ export const loginUtilisateur = async (req, res) => {
         // Vérifier si c'est un étudiant ou un professeur
         const isEtudiant = await etudiantModel.isEtudiant(utilisateur.idutilisateur);
         const isProfesseur = await professeurModel.isProfesseur(utilisateur.idutilisateur);
-        console.log(isEtudiant ,isProfesseur);
+        // console.log(isEtudiant ,isProfesseur);
 
         let role = "";
         let redirectURL = "";
@@ -72,7 +72,7 @@ export const loginUtilisateur = async (req, res) => {
         // Créer un token JWT
         const token = jwt.sign(
             { id: utilisateur.idutilisateur, role },
-            'process.env.JWT_SECRET',
+            process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
 
