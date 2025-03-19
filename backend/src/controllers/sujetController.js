@@ -1,12 +1,16 @@
+<<<<<<< HEAD
 import * as sujetModel from "../models/sujetModel.js";
+=======
+>>>>>>> a40ac6267fe0ce0af3a02bf761d75043d54fd664
 import supabase from "../config/supabase.js";
+import * as sujetModel from "../models/sujetModel.js";
 
 
 export const createSujet = async (req, res) => {
   try {
-      const { nomSujet, idCours } = req.body;
+      const { nomSujet, idCours,datesoumission } = req.body;
       const file = req.file;
-      const sujet = await sujetModel.createSujet(nomSujet, '', idCours);
+      const sujet = await sujetModel.createSujet(nomSujet, '', idCours,datesoumission);
       const fileName = sujet.idsujet; 
 
       const { error } = await supabase.storage
@@ -15,7 +19,7 @@ export const createSujet = async (req, res) => {
 
       if (error) throw error;
       const fileUrl = supabase.storage.from('sujets').getPublicUrl(fileName).data.publicUrl;
-      const updatedSujet = await sujetModel.updateSujet(sujet.idsujet, nomSujet, fileUrl);
+      const updatedSujet = await sujetModel.updateSujet(sujet.idsujet, nomSujet, fileUrl,datesoumission);
       res.status(201).json({ data: updatedSujet });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -35,7 +39,7 @@ export const getSujetById = async (req, res) => {
 export const updateSujet = async (req, res) => {
   try {
     const { idSujet } = req.params;
-    const { nomSujet } = req.body;
+    const { nomSujet,datesoumission } = req.body;
     const file = req.file;
 
     let sujet = await sujetModel.getSujetById(idSujet);
