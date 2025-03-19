@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-import * as sujetModel from "../models/sujetModel.js";
-=======
->>>>>>> a40ac6267fe0ce0af3a02bf761d75043d54fd664
 import supabase from "../config/supabase.js";
 import * as sujetModel from "../models/sujetModel.js";
 
@@ -44,11 +40,9 @@ export const updateSujet = async (req, res) => {
 
     let sujet = await sujetModel.getSujetById(idSujet);
     let fileUrl = sujet.urlsujet;
-
     if (file) {
       const newFileName = `${idSujet}.pdf`; // <-- extension explicite
 
-      // ⚠️ Force la suppression précise de l'ancien fichier
       if (fileUrl && fileUrl.trim() !== "") {
         const oldFileName = fileUrl.split('/').pop();
         
@@ -79,7 +73,7 @@ export const updateSujet = async (req, res) => {
     }
 
     // Mise à jour finale dans la BD
-    sujet = await sujetModel.updateSujet(idSujet, nomSujet, fileUrl);
+    sujet = await sujetModel.updateSujet(idSujet, nomSujet, fileUrl,datesoumission);
     res.status(200).json(sujet);
 
   } catch (error) {

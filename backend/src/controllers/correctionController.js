@@ -10,28 +10,30 @@ export const generateCorrection = async (req, res) => {
   const { idSujet } = req.params;
 
   try {
-    // 1️⃣ Récupérer l'URL du sujet dans la base de données
     const sujet = await sujetModel.getSujetById(idSujet);
     if (!sujet || !sujet.urlsujet) {
       return res.status(404).json({ error: "Sujet introuvable" });
     }
     
     const sujetUrl = sujet.urlsujet; 
-
-    // 2️⃣ Télécharger le sujet depuis Supabase
-    const response = await axios.get(sujetUrl, { responseType: "arraybuffer" });
+    // pdfBuffer = null;
+    const response = await axios.get(sujetUrl, { responseType: "arraybuffer" });  
     
-    // 3️⃣ Extraction du texte du PDF
+    console.log(response);
     let extractedText = " ";
-    const pdfBuffer = Buffer.from(response.data);
+    let pdfBuffer = Buffer.from(response.data);
+    console.log(pdfBuffer);
     try {
       const pdfData = await pdfParse(pdfBuffer);
       extractedText = pdfData.text;
       console.log("✅ Texte extrait du PDF :", extractedText);
+      pdfBuffer.fill(0); 
+      pdfBuffer = null;
     } catch (error) {
       console.error("Erreur d'extraction du texte :", error.message);
       return res.status(500).json({ error: "Impossible de lire le fichier PDF." });
     }
+
     const prompt = `
       You are an expert teacher , responsible for creating concise answer key for the following exam:
       ${extractedText}
@@ -52,28 +54,29 @@ export const generateCorrection = async (req, res) => {
 
     const correctionText = ollamaResponse.data.response.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
     // const correctionText = 'bonjour je marche';
+
     const doc = new PDFDocument();
     const buffers = [];
 
     doc.on("data", buffers.push.bind(buffers));
     doc.on("end", async () => {
-        const pdfBuffer = Buffer.concat(buffers);
+      const pdfBuffer = Buffer.concat(buffers);
 
-        const fileName = `correction-${idSujet}.pdf`;
-        const { data, error } = await supabase
-          .storage
-          .from('corrections')
-          .upload(fileName, pdfBuffer, { contentType: 'application/pdf' });
 
-        if (!data || error) {
-            console.error(" Erreur d'upload sur Supabase :", error?.message);
-            return res.status(500).json({ error: "Erreur lors de l'upload sur Supabas e" });
-        }
+      const fileName = `correction-${idSujet}.pdf`;
+      const { data, error } = await supabase
+        .storage
+        .from('corrections')
+        .upload(fileName, pdfBuffer, { contentType: 'application/pdf' });
 
-        // 7️⃣ Enregistrer l’URL dans la base
-        const correction = await correctionModel.createCorrection(idSujet, data.path);
+      if (!data || error) {
+          console.error(" Erreur d'upload sur Supabase :", error?.message);
+          return res.status(500).json({ error: "Erreur lors de l'upload sur Supabas e" });
+      }
+      const fileUrl = supabase.storage.from('corrections').getPublicUrl(fileName).data.publicUrl;
+      const correction = await correctionModel.createCorrection(idSujet, fileUrl);
 
-        res.status(201).json({ message: "nice guynss", data: correction });
+      res.status(201).json({ message: "nice guynss", data: correction });
     });
     //niokhh le texte
     doc.fontSize(12).text(correctionText, { align: 'justify' });
@@ -112,35 +115,45 @@ export const getCorrectionById = async (req, res) => {
 };
 
 export const modifierCorrection = async (req, res) => {
-  const { idCorrection } = req.params;
-  const { file } = req;
-
   try {
-    if (!file) {
-      return res.status(400).json({ error: "Aucun fichier reçu pour mise à jour." });
+    const { idCorrection } = req.params; 
+    const file = req.file; 
+    let correction = await correctionModel.getCorrectionById(idCorrection);
+    let fileUrl = correction.urlcorrection; 
+
+    if (file) {
+      const newFileName = `${idCorrection}.pdf`; 
+      if (fileUrl && fileUrl.trim() !== "") {
+        const oldFileName = fileUrl.split('/').pop(); 
+        const { error: removeError } = await supabase.storage
+          .from('corrections')
+          .remove([oldFileName]);
+
+        if (removeError) {
+          console.error("Erreur suppression fichier existant :", removeError);
+          throw removeError; 
+        }
+      }
+
+      const { error: uploadError } = await supabase.storage
+        .from('corrections')
+        .upload(newFileName, file.buffer, { contentType: file.mimetype });
+
+      if (uploadError) {
+        console.error("Erreur upload fichier :", uploadError);
+        throw uploadError;
+      }
+      fileUrl = supabase.storage.from('corrections').getPublicUrl(newFileName).data.publicUrl;
     }
-
-    const pdfContent = fs.readFileSync(file.path);
-    const newPath = `updated-correction-${idCorrection}.pdf`;
-
-    // Mettre à jour le fichier sur Supabase
-    const { data, error } = await supabase
-      .storage
-      .from('corrections')
-      .update(newPath, pdfContent, { contentType: 'application/pdf' });
-
-    if (error) throw error;
-
-    // Mettre à jour l'URL dans la base de données
-    const correction = await correctionModel.updateCorrection(idCorrection, data.path);
-    fs.unlinkSync(file.path);
-
-    res.status(200).json({ message: "Corrigé mis à jour avec succès", data: correction });
-
+    correction = await correctionModel.updateCorrection(idCorrection, fileUrl);
+    res.status(200).json(correction);
   } catch (error) {
+    console.error("Erreur mise à jour correction :", error);
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 export const supprimerCorrection = async (req, res) => {
   const { idCorrection } = req.params;
