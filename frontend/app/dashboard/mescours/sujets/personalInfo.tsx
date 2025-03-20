@@ -1,12 +1,13 @@
 "use client";
+import { creerCopie, getCopieByidSujetAndIdUser } from "@/app/api/copie/query";
 import { supprimerSujet } from "@/app/api/sujet/query";
 // import { modifiersujets, suprimersujets } from '@/app/api/sujets/query';
 import PdfViewer from "@/components/ui/PdfViewer";
 import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/components/ui/dialogConfirm';
-import { Sujet, User } from '@/interface/type';
+import { Copie, Sujet, User } from '@/interface/type';
 import { getSupabaseUser } from '@/lib/authMnager';
-import { Save, Trash, Trash2, UserRoundPen, X } from 'lucide-react';
+import { Save, Send, Trash, Trash2, UserRoundPen, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { ChangeEvent, CSSProperties, useEffect, useState } from 'react';
 import BeatLoader from "react-spinners/BeatLoader";
@@ -28,6 +29,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ sujet }) => {
 const router = useRouter();
 const [isDialogOpen, setDialogOpen] = useState(false);
 const [user, setUser] = useState<User>();
+const [copie, setCopie] = useState<Copie>();
 let [color, setColor] = useState("#ffffff");
 const [isLoading, setIsLoading] = useState(false);
 const [currentSujet, setcurrentSujet] = useState({
@@ -51,6 +53,29 @@ const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 };
 
 
+const handleAddCopie = async () => {
+  setIsLoading(true)
+  if(user?.idutilisateur && file)
+{
+  try{
+    console.log(sujet.idsujet,user.idutilisateur,file)
+    const response = await creerCopie(sujet.idsujet,user.idutilisateur,file)
+    console.log("Copie ajouter avec succes",response)
+    setFile(null); 
+
+    setIsLoading(false)
+    fetchData()
+
+  }catch(error)
+  {
+    setIsLoading(false)
+    console.error("Erreur lors de l'ajout de la copie:", error); 
+  }
+}
+ 
+
+};
+
 const handleRemoveFile = () => {
   setFile(null); 
 };
@@ -60,17 +85,34 @@ const handleInputChange = (e : ChangeEvent<HTMLInputElement>) => {
   setcurrentSujet({ ...sujet, [name]: value });
 };
 
+
 async function fetchData() {
-  const user = getSupabaseUser()
+  setIsLoading(true)
+    const data2 = getSupabaseUser()
     setUser(user)
-    
+    console.log("terminer");
+ 
+    try {
+        const data: any = await getCopieByidSujetAndIdUser(sujet.idsujet,data2.idutilisateur)
+        if (data) {
+          console.log(data)
+          setCopie(data)         
+        } 
+          } catch (error) {
+            console.error("Error fetching copie details:", error)
+          } finally {
+            setIsLoading(false)
+          }
 
 }
 
 useEffect(() => {
- 
-  fetchData()
-}, [])
+  if (sujet && sujet.idsujet) {
+    fetchData();
+  } else {
+    console.log("En attente de sujet...");
+  }
+}, [sujet])
 
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
@@ -104,7 +146,7 @@ const deleteSujet = async () => {
 }
 
   
-if (isLoading) {
+if (isLoading || !sujet) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
       <div className="sweet-loading">
@@ -130,38 +172,46 @@ if (isLoading) {
         <div>
           <div className="flex items-center w-full">
           {(sujet?.urlsujet && !editMode)&&(<div className="container mx-auto p-3">
-            <div className="flex flex-row gap-6 p-4 mb-2">
+            <div className="grid  grid-cols-2 mb-2 gap-full w-full gap-8">
+            <div>
+              <div className="text-2xl font-bold">Aperçu du Sujet</div>
+              <div className="w-26 justify-end items-end grid grid-cols-2 gap-2">
+                  {(user?.role=="professeur")&&(<> <Button onClick={() => setDialogOpen(true)} className='font-bold gap-2 bg-red-700 hover:bg-red-800'>
+                    <Trash2 />
+                      
+                  </Button>
+                  <Button onClick={activeEdit} className='font-bold gap-2'>
 
-            <div className="text-2xl font-bold">Aperçu du Sujet</div>
-                <div className="w-26 justify-end items-end grid grid-cols-2 gap-2">
-                {(user?.role=="professeur")&&(<> <Button onClick={() => setDialogOpen(true)} className='font-bold gap-2 bg-red-700 hover:bg-red-800'>
-                  <Trash2 />
+                  <UserRoundPen />
                     
-                </Button>
-                <Button onClick={activeEdit} className='font-bold gap-2'>
-
-                <UserRoundPen />
-                  
-                </Button>
-                </>)}
-                <ConfirmDialog
-                    isOpen={isDialogOpen}
-                    message={`Etes-vous sûr de vouloir supprimer ${sujet?.nomsujet} ?`}
-                    onConfirm={() => {
-                      deleteSujet();
-                      setDialogOpen(false);
-                    }}
-                    onCancel={() => setDialogOpen(false)}
-                  />
+                  </Button>
+                  </>)}
+                  <ConfirmDialog
+                      isOpen={isDialogOpen}
+                      message={`Etes-vous sûr de vouloir supprimer ${sujet?.nomsujet} ?`}
+                      onConfirm={() => {
+                        deleteSujet();
+                        setDialogOpen(false);
+                      }}
+                      onCancel={() => setDialogOpen(false)}
+                    />
 
 
-                </div>
+                  </div>
+            </div>
+            {copie&&(
+            <div className="text-2xl font-bold ml-16">Votre proposition</div>
+
+            )}
+  
+               
             </div>
             <div className="flex flex-row w-full gap-8">
             <PdfViewer pdfUrl={sujet.urlsujet} />
 
             <div className="w-3/4 items-center  rounded-xl  justify-center flex flex-col gap-1">
-                  {!file && (
+
+                  {(!file && !copie) && (
                     <>
                     <label htmlFor="file" className="cursor-pointer w-full h-full flex-col rounded-xl flex items-center justify-center bg-gray-200 hover:bg-gray-300 border-b" >
                       <img
@@ -180,7 +230,7 @@ if (isLoading) {
                     />
                     </>
                   )}
-                    {file && (
+                    {(file && !copie)&& (
                       <div className="mt-2 flex items-center justify-center flex-col text-center">
                         <img
                         src="/confirmation.png"
@@ -188,14 +238,48 @@ if (isLoading) {
                         className="w-24 h-24 rounded-full" 
                       />
                         <p className='font-bold text-sm text-green-500 mt-2'>Copie sélectionnée : {file.name}</p>
+                        <div className="mt-4 flex flex-row gap-2">
                         <button
                           type="button"
                           onClick={handleRemoveFile}
-                          className="bg-red-500 text-white cursor-pointer rounded px-2 py-2 mt-2"
+                          className="bg-red-500 text-white hover:bg-red-700 cursor-pointer rounded px-2 py-2 "
                         >
                           <Trash/>
                         </button>
+                        <button
+                          type="button"
+                          onClick={handleAddCopie}
+                          className="bg-blue-500 text-white hover:bg-blue-700 cursor-pointer rounded px-2 py-2 "
+                        >
+                          <Send/>
+                        </button>
+                        </div>
+
                       </div>
+                    )}
+                    {(copie)&& (
+                     <>
+                      
+                                <PdfViewer pdfUrl={copie.urlcopie} />
+                        {/* <div className="mt-4 flex flex-row gap-2">
+                        <button
+                          type="button"
+                          disabled
+                          onClick={handleRemoveFile}
+                          className="bg-red-500 text-white hover:bg-red-700 cursor-pointer rounded px-2 py-2 "
+                        >
+                          <Trash/>
+                        </button>
+                        <button
+                        disabled
+                          type="button"
+                          onClick={handleAddCopie}
+                          className="bg-blue-500 text-white hover:bg-blue-700 cursor-pointer rounded px-2 py-2 "
+                        >
+                          <Send/>
+                        </button>
+                        </div> */}
+                        </>
                     )}
                   </div>
             </div>
@@ -239,7 +323,7 @@ if (isLoading) {
 
           
           ):(   
-            <div className=''>      
+            <div className='flex flex-row'>      
             <div className="grid grid-cols-2 w-1/2 ml-8 items-center justify-center rounded-lg">
             {/* <!-- First Bloc --> */}
             
@@ -282,6 +366,36 @@ if (isLoading) {
   
                          
             </div>
+
+            <div className="grid grid-cols-1 w-1/2 pl-12 ml-12 items-center justify-between rounded-lg">
+            {/* <!-- First Bloc --> */}
+            
+            {/* <!-- Second Bloc --> */}
+           
+            <div className="flex-row flex  ">
+                        <div className="text-gray-500 text-sm sm:text-base">Soumis le</div>
+                        <div className="leading-6 ml-1 text-sm sm:text-base font-bold"> {
+                                              new Date(copie?.created_at as string).toLocaleDateString("fr-FR", {
+                                                day: "2-digit",
+                                                month: "long",
+                                                year: "numeric",
+                                              }) +
+                                              " à " +
+                                              new Date(copie?.created_at as string).toLocaleTimeString("fr-FR", {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                second: "2-digit",
+                                              })}</div>
+
+
+                      </div> 
+
+
+            
+  
+                         
+            </div>
+          
           
 
 

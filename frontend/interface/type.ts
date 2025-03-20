@@ -45,3 +45,14 @@ export type Sujet={
   created_at:string,
   datesoumission:string
 }
+
+export type Copie = {
+  idcopie: string;
+  idutilisateur: string;
+  idsujet: string;
+  noteia?: number | null;
+  notefinal?: number | null;
+  commentaire?: string | null;
+  urlcopie: string;
+  created_at?: string;
+};
