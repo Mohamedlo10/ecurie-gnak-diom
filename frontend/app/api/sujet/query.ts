@@ -2,7 +2,14 @@
 
 export const getSujetByidCours = async (idCours:string) => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BACK}/api/sujet/cours/${idCours}`);
-    if (!res.ok) throw new Error("Erreur lors de la récupération des cours du prof");
+    if (!res.ok) throw new Error("Erreur lors de la récupération des sujets du prof");
+    return res.json();
+  };
+
+
+  export const getSujetByid = async (idCours:string) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BACK}/api/sujet/${idCours}`);
+    if (!res.ok) throw new Error("Erreur lors de la récupération du sujet");
     return res.json();
   };
 

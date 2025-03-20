@@ -11,7 +11,7 @@ import { Plus, Trash } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { CSSProperties, useEffect, useState } from "react";
 import BeatLoader from "react-spinners/BeatLoader";
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { columns } from "./components/columns";
 import { DataTable } from './components/data-table';
 
@@ -67,7 +67,7 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
     };
    
       const handleNavigation = (idsujet:string) => {
-        router.push(`/dashboard/mescours/sujets?id=${idsujet}`);
+        router.push(`/dashboard/sujet?id=${idsujet}`);
       };
     
       const filteredsujets = sujets.filter((sujet:Sujet) =>
@@ -153,15 +153,15 @@ const SujetsInfo: React.FC<SujetsInfoProps> = ({ coursId }) => {
             setIsAddingsujet(false);
             fetchData();
           setIsLoading(false)
-          /*   toast.success(`Client ajouté avec succès: ${newClient.prenom}`);
-            console.log(`Client ajouté avec succès: ${newClient.prenom}`);
+            toast.success(`sujet ajouté avec succès: ${response.nomsujet}`);
+            console.log(`sujet ajouté avec succès: ${response.nomsujet}`);
+            alert('sujet add')
       
-          } else {
-            console.error("Erreur lors de l'ajout du client");
-            toast.error("Erreur lors de l'ajout du client");
-          } */
+          
+           
         } catch (error) {
-          console.error("Erreur lors de l'ajout du client:", error);
+          console.error("Erreur lors de l'ajout du sujet:", error);
+          toast.error(`Erreur lors de l'ajout du sujet ${error}`);
           setIsLoading(false)
 
         }
