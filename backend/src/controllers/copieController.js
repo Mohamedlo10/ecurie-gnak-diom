@@ -1,5 +1,9 @@
 import * as copieModel from "../models/copieModel.js";
+import * as correctionModel from "../models/correctionModel.js";
 import supabase from "../config/supabase.js";
+import axios from "axios";
+import pdfParse from 'pdf-parse';
+
 
 export const addCopie = async (req, res) => {
   try {
@@ -22,12 +26,156 @@ export const addCopie = async (req, res) => {
     const fileUrl = supabase.storage.from('copies').getPublicUrl(fileName).data.publicUrl;
     const updatedCopie = await copieModel.updateCopie(copie.idcopie, fileUrl);
 
-    res.status(201).json({ data: updatedCopie });
+ 
+  let resultCorrection;
+    try {
+      resultCorrection = await corrigerCopie(updatedCopie.idcopie, updatedCopie.urlcopie, idsujet);
+    } catch (err) {
+      // S'il y a un souci lors de la correction, on peut renvoyer la copie créée
+      // mais indiquer l'erreur de correction
+      return res.status(500).json({
+        message: "Copie créée, mais erreur lors de la correction.",
+        copie: updatedCopie,
+        error: err.message
+      });
+    }
+
+    // Si tout s'est bien passé, on renvoie la copie finale avec la note/commentaire
+    return res.status(201).json({
+      message: "Copie créée et corrigée avec succès.",
+      note: resultCorrection.note,
+      commentaire: resultCorrection.commentaire,
+      data: resultCorrection.copie
+    });
+
   } catch (error) {
-    console.error("Erreur création copie :", error);
-    res.status(500).json({ error: error.message });
+    console.error("Erreur création + correction copie :", error);
+    return res.status(500).json({ error: error.message });
   }
 };
+
+
+
+
+export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
+  try {
+
+    const correction = await correctionModel.getCorrectionByIdSujet(idsujet);
+    if (!correction || !correction.urlcorrection) {
+      throw new Error("Corrigé type non trouvé pour ce sujet.");
+    }
+    // Extraction de la copie
+    let copieText = "";
+    while (true) {
+      try {
+        const copieResponse = await axios.get(urlcopie, { responseType: "arraybuffer" });
+        const pdfData = await pdfParse(Buffer.from(copieResponse.data));
+        copieText = pdfData.text;
+        break; // Extraction réussie, on sort de la boucle
+      } catch (err) {
+        console.error("Impossible d'extraire le texte de la copie: " + err.message);
+        // Attendre 1 seconde avant de réessayer
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    // Extraction du corrigé
+    let correctionText = "";
+    while (true) {
+      try {
+        const correctionResponse = await axios.get(correction.urlcorrection, { responseType: "arraybuffer" });
+        const pdfDataCorrection = await pdfParse(Buffer.from(correctionResponse.data));
+        correctionText = pdfDataCorrection.text;
+        break; // Extraction réussie, on sort de la boucle
+      } catch (err) {
+        console.error("Impossible d'extraire le texte du corrigé: " + err.message);
+        // Attendre 1 seconde avant de réessayer
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+     
+    const prompt = `
+    You are an experienced exam evaluator. You are provided with two texts: a "Model Answer" and a "Student Submission". Your task is to carefully compare the Student Submission with the Model Answer and evaluate its overall quality based on the following criteria:
+    - Accuracy: How correct are the answers compared to the model answer?
+    - Completeness: Does the submission address all parts of the exam question?
+    - Clarity and Organization: Is the response well-structured and easy to follow?
+    - Depth and Reasoning: Does the submission demonstrate thorough understanding with clear reasoning?
+
+    Based on your analysis, assign a grade between 0 and 20 and provide a detailed evaluation comment that highlights strengths, points out weaknesses, and offers specific suggestions for improvement.
+
+    IMPORTANT:
+    - Your response MUST be a single, valid JSON object.
+    - DO NEVER NEVER NEVER include any extra text,  markdown formatting, triple backticks(\`\`\`), or any other characters outside the JSON.
+    - The JSON object MUST contain EXACTLY two keys: "noteia" (a number between 0 and 20) and "commentaire" (a string). Use "comment" (not "commentaire").
+    - Your entire output must consist ONLY of the JSON object, starting with { and ending with }.
+    -just do somethinks like this nothing else:(DONT WRITE 'JSON' )
+    {
+      "noteia":<0..20> ,
+      "commentaire": " "
+    }
+    Not adding any style in all file.
+    
+
+
+    Model Answer:
+    ${correctionText}
+
+    Student Submission:
+    ${copieText}
+  `;
+
+    
+
+
+  let evaluation;
+  while (true) {
+    try {
+      const ollamaResponse = await axios.post(
+        "http://localhost:11434/api/generate",
+        {
+          model: "deepseek-r1:1.5b",
+          prompt: prompt,
+          stream: false
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      );
+
+      let aiResponse = ollamaResponse.data.response
+        .replace(/<think>[\s\S]*?<\/think>/gi, "") // Supprime le contenu entre <think> et </think>
+        .replace(/```/g, "")                        // Supprime uniquement les marqueurs ```
+        .trim();
+
+      console.log(aiResponse);
+
+      evaluation = JSON.parse(aiResponse);
+      break; // La réponse est au format JSON, on sort de la boucle
+    } catch (err) {
+      console.error("La réponse de l'IA n'est pas au format JSON attendu: " + err.message);
+      // Optionnel : attendre 1 seconde avant de réessayer
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+
+  const finalCopie = await copieModel.updateNoteCopie(idcopie, evaluation.noteia, evaluation.commentaire);
+
+  
+  return {
+    copie: finalCopie
+  };
+
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
 
 export const getAllCopieByIdSujet = async (req, res) => {
   try {
@@ -118,3 +266,4 @@ export const deleteCopie = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+

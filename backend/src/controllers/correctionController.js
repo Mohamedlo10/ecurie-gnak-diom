@@ -176,3 +176,141 @@ export const supprimerCorrection = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
+  try {
+    // Récupération du corrigé type pour ce sujet
+    const correction = await correctionModel.getCorrectionByIdSujet(idsujet);
+    if (!correction || !correction.urlcorrection) {
+      throw new Error("Corrigé type non trouvé pour ce sujet.");
+    }
+
+    // Télécharger et extraire le texte de la copie
+    let copieText = "";
+    try {
+      const copieResponse = await axios.get(urlcopie, { responseType: "arraybuffer" });
+      const pdfData = await pdfParse(Buffer.from(copieResponse.data));
+      copieText = pdfData.text;
+    } catch (err) {
+      throw new Error("Impossible d'extraire le texte de la copie: " + err.message);
+    }
+
+    // Télécharger et extraire le texte du corrigé
+    let correctionText = "";
+    try {
+      const correctionResponse = await axios.get(correction.urlcorrection, { responseType: "arraybuffer" });
+      const pdfDataCorrection = await pdfParse(Buffer.from(correctionResponse.data));
+      correctionText = pdfDataCorrection.text;
+    } catch (err) {
+      throw new Error("Impossible d'extraire le texte du corrigé type: " + err.message);
+    }
+
+    // Construire le prompt pour Ollama / Deepseek
+    const prompt = `
+Vous êtes un professeur expérimenté chargé d'évaluer une copie d'examen en comparant la réponse de l'étudiant avec le corrigé type.
+Corrigé type:
+${correctionText}
+
+Copie de l'étudiant:
+${copieText}
+
+Instructions:
+- Analysez la copie en la comparant au corrigé type.
+- Attribuez une note sur 20 en tenant compte de la qualité, de la précision et de la complétude des réponses.
+- Fournissez un commentaire détaillé indiquant les points forts et les axes d'amélioration.
+Répondez uniquement sous forme de JSON avec le format suivant:
+{"note": <note_sur_20>, "commentaire": "<votre commentaire>"}
+    `;
+
+    // Appel à Ollama
+    const ollamaResponse = await axios.post("http://localhost:11434/api/generate", {
+      model: "deepseek-r1:1.5b",
+      prompt: prompt,
+      stream: false
+    });
+
+    // Nettoyage et parsing de la réponse
+    let aiResponse = ollamaResponse.data.response.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+    let evaluation;
+    try {
+      evaluation = JSON.parse(aiResponse);
+    } catch (err) {
+      throw new Error("La réponse de l'IA n'est pas au format JSON attendu: " + err.message);
+    }
+
+    // Vérifier qu'on a bien une note et un commentaire
+    if (typeof evaluation.note === "undefined" || typeof evaluation.commentaire === "undefined") {
+      throw new Error("La réponse de l'IA ne contient pas note ou commentaire.");
+    }
+
+    // Mise à jour de la copie en base (note + commentaire)
+    // Assure-toi d'avoir une fonction dans copieModel (par ex. updateNoteCopie)
+    const finalCopie = await copieModel.updateNoteCopie(idcopie, evaluation.note, evaluation.commentaire);
+
+    // On peut retourner l'objet final, ou juste la note/commentaire
+    return {
+      note: evaluation.note,
+      commentaire: evaluation.commentaire,
+      copie: finalCopie
+    };
+
+  } catch (error) {
+    // On relance l'erreur pour qu'elle soit gérée par l'appelant
+    throw error;
+  }
+};
+
+// 2) Fonction addCopie, qui appelle corrigerCopie à la fin
+export const addCopie = async (req, res) => {
+  try {
+    const { idutilisateur, idsujet } = req.body;
+    console.log("Reçu:", idutilisateur, idsujet);
+
+    // Vérifier la présence du fichier
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ message: "Fichier manquant !" });
+    }
+
+    // Création de la copie en base
+    // (placeholder "à ngeinteih plutard" pour coller à ton code)
+    const copie = await copieModel.addCopie(idutilisateur, idsujet, "à ngeinteih plutard");
+    const fileName = `${copie.idcopie}.pdf`;
+
+    // Upload dans le bucket "copies"
+    const { error } = await supabase.storage
+      .from("copies")
+      .upload(fileName, file.buffer, { contentType: file.mimetype });
+    if (error) throw error;
+
+    // Récupérer l'URL publique
+    const fileUrl = supabase.storage.from("copies").getPublicUrl(fileName).data.publicUrl;
+    const updatedCopie = await copieModel.updateCopie(copie.idcopie, fileUrl);
+
+    // Appeler la fonction de correction (on lui passe l'idcopie, l'url et le sujet)
+    let resultCorrection;
+    try {
+      resultCorrection = await corrigerCopie(updatedCopie.idcopie, updatedCopie.urlcopie, idsujet);
+    } catch (err) {
+      // S'il y a un souci lors de la correction, on peut renvoyer la copie créée
+      // mais indiquer l'erreur de correction
+      return res.status(500).json({
+        message: "Copie créée, mais erreur lors de la correction.",
+        copie: updatedCopie,
+        error: err.message
+      });
+    }
+
+    // Si tout s'est bien passé, on renvoie la copie finale avec la note/commentaire
+    return res.status(201).json({
+      message: "Copie créée et corrigée avec succès.",
+      note: resultCorrection.note,
+      commentaire: resultCorrection.commentaire,
+      data: resultCorrection.copie
+    });
+
+  } catch (error) {
+    console.error("Erreur création + correction copie :", error);
+    return res.status(500).json({ error: error.message });
+  }
+};

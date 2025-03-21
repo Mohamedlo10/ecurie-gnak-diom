@@ -16,7 +16,7 @@ export const createSujet = async (req, res) => {
 
       if (error) throw error;
       const fileUrl = supabase.storage.from('sujets').getPublicUrl(fileName).data.publicUrl;
-      const updatedSujet = await sujetModel.updateSujet(sujet.idsujet, nomSujet, fileUrl, datesoumission);
+      const updatedSujet = await sujetModel.updateSujet(sujet.idsujet, fileUrl, datesoumission);
       res.status(201).json({ data: updatedSujet });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -59,8 +59,6 @@ export const updateSujet = async (req, res) => {
           throw removeError;
         }
       }
-      
-      // Upload du nouveau fichier explicitement avec extension PDF
       const { error: uploadError } = await supabase.storage
         .from('sujets')
         .upload(newFileName, file.buffer, { contentType: file.mimetype });
@@ -69,13 +67,10 @@ export const updateSujet = async (req, res) => {
         console.error("Erreur lors de l'upload :", uploadError);
         throw uploadError;
       }
-
-      // fileUrl = supabase.storage.from('sujets').getPublicUrl(newFileName).data.publicUrl;
     }
 
-    // Mise à jour finale dans la BD
-    console.log(idSujet, datesoumission);
-    sujet = await sujetModel.updateSujet(idSujet, datesoumission);
+    // console.log(idSujet, datesoumission);
+    sujet = await sujetModel.updateSujet(idSujet, fileUrl, datesoumission);
     res.status(200).json(sujet);
 
   } catch (error) {

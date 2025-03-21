@@ -1,6 +1,6 @@
 import sql from "../config/db.js";
 
-export const addCopie = async (idUtilisateur, idsujet, urlcopie) => {
+export const  addCopie = async (idUtilisateur, idsujet, urlcopie) => {
   const query = await sql`
     INSERT INTO copie(idutilisateur, idsujet, urlcopie)
     VALUES(${idUtilisateur}, ${idsujet}, ${urlcopie})
@@ -36,6 +36,12 @@ export const updateCopie = async (idcopie, urlcopie) => {
     UPDATE copie SET urlcopie=${urlcopie}
     WHERE idcopie=${idcopie} RETURNING *;
   `)[0];
+};
+export const updateNoteCopie = async(idcopie,noteia,commentaire) =>{
+  return (await sql`
+    UPDATE copie SET noteia=${noteia}, commentaire=${commentaire}
+    WHERE idcopie=${idcopie} RETURNING *;
+    `)[0];
 };
 
 export const deleteCopie = async (idcopie) => {

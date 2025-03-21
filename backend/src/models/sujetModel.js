@@ -18,9 +18,9 @@ export const getSujetById = async (idSujet) => {
   return (await sql`SELECT * FROM sujet WHERE idSujet=${idSujet};`)[0];
 };
 
-export const updateSujet = async (idSujet, datesoumission) => {
+export const updateSujet = async (idSujet, fileUrl, datesoumission) => {
   return (await sql`
-    UPDATE sujet SET datesoumission=${datesoumission}
+    UPDATE sujet SET urlsujet = ${fileUrl}, datesoumission=${datesoumission}
     WHERE idSujet=${idSujet} RETURNING *;
   `)[0];
 };
