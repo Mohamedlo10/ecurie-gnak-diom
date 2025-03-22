@@ -1,4 +1,4 @@
-// backend/src/models/sujetModel.js
+
 import sql from "../config/db.js";
 
 export const createSujet = async (nomSujet, urlSujet, idCours, datesoumission) => {

@@ -82,7 +82,7 @@ export const updateSujet = async (req, res) => {
 
 export const deleteSujet = async (req, res) => {
   try {
-    const { idSujet } = req.params; // <-- 🔥 Corrigé ici exactement comme dans ta route
+    const { idSujet } = req.params; 
 
     let sujet = await sujetModel.getSujetById(idSujet);
     let fileUrl = sujet.urlsujet;
@@ -101,7 +101,6 @@ export const deleteSujet = async (req, res) => {
       }
     }
 
-    // Suppression du sujet en base
     const suppression = await sujetModel.deleteSujet(idSujet);
     res.status(200).json(suppression);
 
