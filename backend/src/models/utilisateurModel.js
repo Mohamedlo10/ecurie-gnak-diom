@@ -1,11 +1,11 @@
-import sql from '../config/db.js'; 
 import bcrypt from 'bcrypt';
+import sql from '../config/db.js';
 // Fonction pour vérifier si un utilisateur existe déjà par email
 export const findUserByEmail = async (email) => {
     try {
         // Construire la requête SQL avec les paramètres
         const query = await sql`
-            SELECT idutilisateur, nom, prenom, email, motdepasse
+            SELECT *
             FROM utilisateur
             WHERE email = ${email}  
             LIMIT 1

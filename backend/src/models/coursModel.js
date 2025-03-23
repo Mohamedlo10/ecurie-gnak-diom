@@ -15,7 +15,18 @@ export const createCours = async (nomCours,idutilisateur) => {
 export const getCoursById = async (idCours) => {
     try {
         const query = await sql`
-        SELECT * FROM cours WHERE idCours = ${idCours}`;
+        SELECT 
+                cours.idCours, 
+                cours.nomcours, 
+                cours.created_at, 
+                utilisateur.nom, 
+                utilisateur.prenom, 
+                utilisateur.email,
+                utilisateur.idutilisateur
+        FROM cours
+        JOIN professeur ON cours.idutilisateur = professeur.idutilisateur
+        JOIN utilisateur ON professeur.idutilisateur = utilisateur.idutilisateur
+        WHERE idCours = ${idCours}`;
         ; 
         return query[0];
     } catch (error) {

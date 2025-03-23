@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import * as utilisateurModel from '../models/utilisateurModel.js';
 import * as etudiantModel from '../models/etudiantModel.js';
 import * as professeurModel from '../models/professeurModel.js';
+import * as utilisateurModel from '../models/utilisateurModel.js';
 
 // Inscription d'un utilisateur
 export const registerUtilisateur = async (req, res) => {
@@ -28,7 +28,7 @@ export const registerUtilisateur = async (req, res) => {
         } else if (role === 'professeur') {
             await professeurModel.createProfesseur(newUser.idutilisateur);
         }
-
+        newUser.role = role;
         res.status(201).json({ message: 'Utilisateur créé avec succès', utilisateur: newUser, role });
 
     } catch (error) {
@@ -45,8 +45,8 @@ export const loginUtilisateur = async (req, res) => {
         if (!utilisateur) {
             return res.status(400).json({ message: 'Identifiants invalides' });
         }
-        console.log("Mot de passe fourni :", motdepasse);
-        console.log("Mot de passe stocké (hashé) :", utilisateur.motdepasse);
+        // console.log("Mot de passe fourni :", motdepasse);
+        // console.log("Mot de passe stocké (hashé) :", utilisateur.motdepasse);
 
         // Vérifier le mot de passe avec bcrypt (SANS REHASHER)
         const isMatch = await bcrypt.compare( motdepasse, utilisateur.motdepasse);
@@ -57,7 +57,7 @@ export const loginUtilisateur = async (req, res) => {
         // Vérifier si c'est un étudiant ou un professeur
         const isEtudiant = await etudiantModel.isEtudiant(utilisateur.idutilisateur);
         const isProfesseur = await professeurModel.isProfesseur(utilisateur.idutilisateur);
-        console.log(isEtudiant ,isProfesseur);
+        // console.log(isEtudiant ,isProfesseur);
 
         let role = "";
         let redirectURL = "";
@@ -80,10 +80,11 @@ export const loginUtilisateur = async (req, res) => {
             message: 'Connexion réussie',
             token,
             utilisateur: {
-                id: utilisateur.idutilisateur,
+                idutilisateur: utilisateur.idutilisateur,
                 nom: utilisateur.nom,
                 prenom: utilisateur.prenom,
                 email: utilisateur.email,
+                created_at: utilisateur.created_at,
                 role
             },
             redirectURL

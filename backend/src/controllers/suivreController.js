@@ -2,13 +2,13 @@ import * as suivreModel from "../models/suivreModel.js";
 
 export const addEtudiant = async (req, res) => {
     try {
-        const { idcours, idutilisateur } = req.body;
-        console.log(idcours, idutilisateur);
-        if (!idcours || !idutilisateur) {
+        const { idcours, email } = req.body;
+        console.log(idcours, email);
+        if (!idcours || !email) {
             return res.status(400).json({ error: "Les identifiants du cours et de l'utilisateur sont requis." });
         }
 
-        const newSuivre = await suivreModel.addEtudiant(idcours, idutilisateur);
+        const newSuivre = await suivreModel.addEtudiant(idcours, email);
 
         return res.status(201).json({
             message: "Étudiant inscrit avec succès au cours.",

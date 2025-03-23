@@ -1,9 +1,5 @@
 "use client";
-import { userConnection } from "@/app/api/utilisateur/query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
+import { userConnection, userInscription } from "@/app/api/utilisateur/query";
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, CSSProperties, useEffect, useState } from "react";
 import { FiEye, FiEyeOff } from 'react-icons/fi';
@@ -23,9 +19,38 @@ function Login() {
   let [color, setColor] = useState("#ffffff");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   // const [icon, setIcon] = useState(eyeOff);
   const [type, setType] = useState('password');
+  const [user, setUser] = useState({
+    prenom: "",
+    nom: "",
+    email: "",
+    motdepasse: "",
+    confirmPassword:"",
+    role: "",
+    ine: "",
+  });
+  
+  const EmailValidity = (value:string) =>{
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+      return !emailRegex.test(value); 
+  }
 
+  const NonValide = (currentStep==0 && (user.nom=="" || user.prenom=="") ||
+  (currentStep==1 && (user.email=="" || user.motdepasse=="" || user.confirmPassword=="" || EmailValidity(user.email) || (user.motdepasse != user.confirmPassword))                           
+));
+  
+  const nextStep =() =>{
+    setCurrentStep(currentStep+1);
+  }
+
+  const backStep =() =>{
+    setCurrentStep(currentStep-1);
+  }
+  
 
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
@@ -37,8 +62,15 @@ function Login() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
 
+  const handleInputChange = (e : ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUser({ ...user, [name]: value });
+  };
 
  useEffect(() => {
   // Synchronisez les champs avec l'état local lors du montage
@@ -54,43 +86,52 @@ function Login() {
       router.push(`/dashboard`);
     };
 
-    const handleAuth = async (e: ChangeEvent<HTMLFormElement>) => {
-      e.preventDefault();
-    
+    const handleAuth = async () => {
       setIsLoading(true);
       setError('');
     
       try {
-        let response;
-        
+        let data;
+    
         if (isLogin) {
           // Connexion
-          const { data, error }: any = await userConnection(email, password);
-          response = { data, error };
+          data = await userConnection(user.email, user.motdepasse);
+          console.log("Connexion réussie:", data);
+    
+          if (data) {
+            localStorage.setItem('user_session', JSON.stringify(data.utilisateur));
+            handleNavigation()         
+          } 
+            else {
+            throw new Error(data.message || "Échec de connexion.");
+          }
         } else {
           // Inscription
-          const { data, error }: any = await (email, password);
-          response = { data, error };
-        }
+          data = await userInscription(
+            user.email,
+            user.motdepasse,
+            user.nom,
+            user.prenom,
+            user.role,
+            user.ine
+          );
+          console.log("Réponse du backend après inscription:", data);
     
-        const { data, error } = response;
-    
-        if (error) {
-          setError(error.message);
-        } else if (data) {
-          // Stockage session utilisateur
-          localStorage.setItem('supabase_session', JSON.stringify(data));
-          localStorage.setItem('user_session', JSON.stringify(data.user));
-    
-          // Redirection après connexion ou inscription
-          router.push('/dashboard');
+          if (data) {
+            localStorage.setItem('user_session', JSON.stringify(data.utilisateur));
+            router.push('/dashboard');
+          } else {
+            throw new Error(data.message || "Inscription échouée.");
+          }
         }
       } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred.');
+        setError(err.message || 'Une erreur est survenue.');
       } finally {
         setIsLoading(false);
       }
     };
+    
+    
     
     
 
@@ -112,66 +153,225 @@ function Login() {
       );
     }
     
-  return (
-    <div className="mx-auto grid text-white  text-bold shadow-2xl h-3/5 p-4 px-20 w-2/3 rounded-sm gap-4">
-          <div className="grid gap-2 text-center">
-            <h1 className="text-2xl  text- font-bold">Login</h1>
-            <p className="text-balance font-medium ">
-              Enter your email below to login to your account
-            </p>
+    return (
+      <div className="mx-auto grid text-white shadow-2xl p-4 px-20  w-3/4 rounded-sm gap-2">
+        <div className="grid gap-2 text-center">
+          <h1 className="text-xl font-bold">
+            {isLogin ? "Se connecter" : "S'inscrire"}
+          </h1>
+          <p className="text-sm text-zinc-300">
+            {isLogin
+              ? "Entrez votre email ci-dessous pour vous connecter à votre compte"
+              : "Creer un compte pour demarrer "}
+          </p>
+        </div>
+  
+        <form   className="grid overflow-y-hidden max-h-[70vh] gap-4">
+        {(!isLogin && currentStep==0) &&(
+          <>
+          <div className="grid gap-2">
+          <label htmlFor="nom">Nom</label>
+          <input
+            id="nom"
+            name="nom"
+            type="text"
+            className="bg-white text-black h-13 p-2 rounded-md"
+            placeholder="Votre nom"
+            value={user.nom}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <label htmlFor="prenom">Prénom</label>
+          <input
+            id="prenom"
+            name="prenom"
+            type="text"
+            className="bg-white text-black h-13 p-2 rounded-md"
+            placeholder="Votre prénom"
+            value={user.prenom}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        </>
+        )}
+
+         {(currentStep==1 || isLogin)&&
+         (
+          <>
+           <div className="grid gap-2">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              className="bg-white text-black h-13 p-2 rounded-md"
+              placeholder="m@example.com"
+              value={user.email}
+              onChange={handleInputChange}
+              required
+            />
           </div>
-          <form onSubmit={handleAuth} className="grid gap-4">
-            <div className="grid  gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                className="bg-white text-black h-14"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center ">
-                <Label htmlFor="password">Password</Label>
+  
+          <div className="grid gap-2">
+             <div className="flex items-center">
+              <label htmlFor="password">Password</label>
+              {/* {isLogin && (
                 <Link
                   href="/forgot-password"
-                  className="ml-auto inline-block  text-sm underline "
+                  className="ml-auto text-sm underline"
                 >
                   Forgot your password?
                 </Link>
-              </div>
-              <div className=" flex flex-row gap-full">
-              <Input id="password" 
-               className="bg-white h-14 text-black" 
-               type={showPassword ? 'text' : 'password'}
-               placeholder="Password" 
-               value={password}
-               onChange={(e) => setPassword(e.target.value)}
-               required>
-
-               </Input>
-               <span className="flex justify-around items-center" onClick={togglePasswordVisibility}>
-               {showPassword ? <FiEyeOff className="absolute mr-14 text-zinc-500 hover:bg-slate-200 p-1 rounded-full " size={24} /> : <FiEye className="absolute mr-14 text-zinc-500 hover:bg-slate-200 p-1 rounded-full " size={24} />}
+              )} */}
+            </div> 
+           
+  
+            <div className="relative flex items-center">
+              <input
+                id="motdepasse"
+                name="motdepasse"
+                className="bg-white h-13 text-black w-full p-2 rounded-md"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={user.motdepasse}
+                onChange={handleInputChange}
+                required
+              />
+              <span
+                className="absolute right-3 cursor-pointer text-zinc-500 hover:bg-slate-200 p-1 rounded-full"
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? <FiEyeOff size={24} /> : <FiEye size={24} />}
               </span>
-              </div>
-             
             </div>
-            <Button type="submit"  className="w-full h-14 cursor-pointer hover:bg-black mt-2 bg-red-800">
-                  Login
-            </Button>
-            
-          </form>
-          <div className="mb-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link href="#" className="underline">
-              Sign up
-            </Link>
           </div>
-        </div>
-  )
-}
+
+          {!isLogin&&(<div className="grid gap-2">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <div className="relative flex items-center">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  className="bg-white h-13 w-full text-black p-2 rounded-md"
+                  value={user.confirmPassword}
+                  onChange={handleInputChange}
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  required
+                />
+                <span
+                  className="absolute right-3 cursor-pointer text-zinc-500 hover:bg-slate-200 p-1 rounded-full"
+                  onClick={toggleConfirmPasswordVisibility}
+                >
+                  {showConfirmPassword ? <FiEyeOff size={24} /> : <FiEye size={24} />}
+                </span>
+              </div>
+              {user.motdepasse!=user.confirmPassword &&(<span className="text-red-700">
+                Mot de passe different
+              </span>)}
+            </div>)}
+
+          </>
+            )}
+  
+          {(!isLogin && currentStep==2) && (
+            <>
+            
+
+
+            <div className="grid gap-2">
+              <label htmlFor="role">Role</label>
+              <select
+                id="role"
+                className="bg-white text-black h-13 p-2 rounded-md"
+                value={user.role}
+                onChange={(e) => setUser({ ...user, role: e.target.value })} 
+                required
+              >
+                <option value="">Sélectionner un rôle</option>
+                <option value="etudiant">Étudiant</option>
+                <option value="professeur">Professeur</option>
+              </select>
+            </div>
+
+{user.role==="etudiant"&&(
+   <div className="grid gap-2">
+   <label htmlFor="ine">INE</label>
+   <input
+     id="ine"
+     type="text"
+     name="ine"
+     className="bg-white text-black h-13 p-2 rounded-md"
+     placeholder="INE"
+     value={user.ine}
+     onChange={handleInputChange}
+     required
+   />
+ </div>
+
+ 
+)
+
+
+
+}      
+
+          </>
+          )}
+  
+          
+        </form>
+        {(isLogin || currentStep==2) ? 
+          (<div className="flex flex-row gap-8">
+            
+                       {!isLogin &&( <button
+                        onClick={backStep}
+                        type="button"
+                        className="w-full h-13 cursor-pointer hover:bg-black mt-2 bg-zinc-100 text-black hover:text-white rounded-md"
+                      >
+                        Retour
+                      </button>)}
+
+                       <button
+                          type="submit"
+                          onClick={handleAuth}
+                          className="w-full h-13 cursor-pointer hover:bg-black mt-2 bg-red-800 text-white rounded-md"
+                        >
+                          {isLogin ? "Se connecter" : "S'inscrire"}
+                        </button>  
+
+          </div>
+         
+        ):(
+            <div className="flex flex-row gap-8">
+            <button
+            disabled={currentStep==0}
+                onClick={backStep}
+                className={`w-full h-13   mt-2 bg-zinc-100 text-black  rounded-md ${currentStep==0?"opacity-50":"opacity-100 hover:bg-black hover:text-white cursor-pointer"}`}
+              >
+                Retour
+              </button>
+            <button
+            disabled={NonValide}
+            onClick={nextStep}
+            className={`w-full h-13   mt-2 bg-zinc-100 text-black  rounded-md ${NonValide?"opacity-50":"opacity-100 hover:bg-black hover:text-white cursor-pointer"}`}
+          >
+            Suivant
+          </button>
+          </div>
+          )}
+        <div className="mb-4 text-center text-sm">
+          {isLogin ? "Vous n'avez pas de compte ?" : "Vous avez déjà un compte ?"}{" "}
+          <button onClick={toggleAuthMode} className="underline cursor-pointer text-blue-400">
+          {isLogin ? "S'inscrire" :  "Se connecter"}
+          </button>
+        </div> 
+      </div>
+    );
+  };
 
 export default Login

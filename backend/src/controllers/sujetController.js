@@ -1,57 +1,122 @@
-import axios from 'axios';
-import sql from '../config/db.js';
+import supabase from "../config/supabase.js";
+import * as sujetModel from "../models/sujetModel.js";
 
-// Créer un sujet
+
 export const createSujet = async (req, res) => {
-  const { nom, idCours, urlSujet } = req.body;
-
   try {
-    // Extraire le texte du PDF
-    const response = await axios.get(urlSujet, { responseType: 'arraybuffer' });
+      const { nomSujet, idCours,datesoumission } = req.body;
+      const file = req.file;
+      console.log(nomSujet, idCours, datesoumission);
+      const sujet = await sujetModel.createSujet(nomSujet, '', idCours, datesoumission);
+      const fileName = sujet.idsujet; 
 
-    // Insérer le sujet dans la base de données
-    const result = await sql`
-      INSERT INTO sujet (nom, "idCours", urlsujet)
-      VALUES (${nom}, ${idCours}, ${urlSujet})
-      RETURNING *
-    `;
+      const { error } = await supabase.storage
+        .from('sujets')
+        .upload(fileName, file.buffer, { contentType: file.mimetype });
 
-    res.status(201).json(result[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la création du sujet' });
+      if (error) throw error;
+      const fileUrl = supabase.storage.from('sujets').getPublicUrl(fileName).data.publicUrl;
+      const updatedSujet = await sujetModel.updateSujet(sujet.idsujet, fileUrl, datesoumission);
+      res.status(201).json({ data: updatedSujet });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Récupérer un sujet par son ID
+export const getAllSujetByIdCours = async (req, res) => {
+  const sujets = await sujetModel.getAllSujetByIdCours(req.params.idCours);
+  res.status(200).json(sujets);
+};
+
+export const getAllSujetByIdProf = async (req, res) => {
+  const sujets = await sujetModel.getAllSujetByIdProf(req.params.idutilisateur);
+  res.status(200).json(sujets);
+};
+
+export const getAllSujetByIdEtudiant = async (req, res) => {
+  const sujets = await sujetModel.getAllSujetByIdEtudiant(req.params.idutilisateur);
+  res.status(200).json(sujets);
+};
+
 export const getSujetById = async (req, res) => {
-  const { id } = req.params;
+  const sujet = await sujetModel.getSujetById(req.params.idSujet);
+  res.status(200).json(sujet);
+};
 
+export const updateSujet = async (req, res) => {
   try {
-    const result = await sql`
-      SELECT * FROM sujet WHERE id = ${id}
-    `;
+    const { idSujet } = req.params;
+    const { datesoumission } = req.body;
+    const file = req.file;
 
-    if (result.length === 0) {
-      return res.status(404).json({ error: 'Sujet non trouvé' });
+    let sujet = await sujetModel.getSujetById(idSujet);
+    let fileUrl = sujet.urlsujet;
+    if (file) {
+      let newFileName = `${idSujet}`; // <-- extension explicite
+
+      if (fileUrl && fileUrl.trim() !== "") {
+        // const oldFileName = fileUrl.split('/').pop();
+        
+        // Vérifie que l'ancien fichier est exactement celui que tu veux supprimer
+        //console.log("Ancien fichier à supprimer:", oldFileName);
+
+        const { error: removeError } = await supabase.storage
+          .from('sujets')
+          .remove([newFileName]);
+        console.log(newFileName);
+        if (removeError) {
+          console.error("Erreur suppression fichier existant :", removeError);
+          throw removeError;
+        }
+      }
+      const { error: uploadError } = await supabase.storage
+        .from('sujets')
+        .upload(newFileName, file.buffer, { contentType: file.mimetype });
+
+      if (uploadError) {
+        console.error("Erreur lors de l'upload :", uploadError);
+        throw uploadError;
+      }
     }
 
-    res.status(200).json(result[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la récupération du sujet' });
+    // console.log(idSujet, datesoumission);
+    sujet = await sujetModel.updateSujet(idSujet, fileUrl, datesoumission);
+    res.status(200).json(sujet);
+
+  } catch (error) {
+    console.error("Erreur finale :", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Lister tous les sujets
-export const getAllSujets = async (req, res) => {
+
+export const deleteSujet = async (req, res) => {
   try {
-    const result = await sql`
-      SELECT * FROM sujet
-    `;
-    res.status(200).json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la récupération des sujets' });
+    const { idSujet } = req.params; 
+
+    let sujet = await sujetModel.getSujetById(idSujet);
+    let fileUrl = sujet.urlsujet;
+
+    if (fileUrl && fileUrl.trim() !== "") {
+      const oldFileName = fileUrl.split('/').pop();
+      console.log("Ancien fichier à supprimer:", oldFileName);
+
+      const { error: removeError } = await supabase.storage
+        .from('sujets')
+        .remove([oldFileName]);
+
+      if (removeError) {
+        console.error("Erreur suppression ancien fichier:", removeError);
+        throw removeError;
+      }
+    }
+
+    const suppression = await sujetModel.deleteSujet(idSujet);
+    res.status(200).json(suppression);
+
+  } catch (error) {
+    console.error("Erreur finale :", error);
+    res.status(500).json({ error: error.message });
   }
-}; 
+};
+

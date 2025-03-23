@@ -1,10 +1,53 @@
-import Image from "next/image"
+'use client'
+import { User } from "@/interface/type";
+import { getSupabaseUser } from "@/lib/authMnager";
 
+import { CSSProperties, useEffect, useState } from "react";
+import BeatLoader from "react-spinners/BeatLoader";
+const override: CSSProperties = {
+  display: "block",
+  margin: "0 auto",
+  borderColor: "red",
+};
 
 function Navbar() {
+  const [user, setUser] = useState<User>();
+  let [color, setColor] = useState("#ffffff");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true)
+      try {
+        setUser(getSupabaseUser())
+      } catch (error) {
+        console.error("Error fetching user details:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchData()
+  }, []) 
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+        <div className="sweet-loading">
+          <BeatLoader
+            color={color}
+            loading={isLoading}
+            cssOverride={override}
+            size={15}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="flex flex-col h-[8vh]">
-    <header className="flex items-center gap-4 border-b bg-white px-10 h-[8vh] ">
+    <div className=" flex-col flex h-[8vh] border-b px-4 lg:h-22 lg:px-6">
+    <header className="flex items-center gap-4   bg-white px-10 h-[8vh] ">
       <div className="w-full">
         <form>
           <div className="relative ">
@@ -17,34 +60,20 @@ function Navbar() {
           </div>
         </form>
       </div>
-      <div className="grid grid-cols-8 items-center gap-8 h-22 w-60">
-          <div className="col-span-6 flex flex-row gap-4 h-1/3 rounded-xl">
-        <Image
-              src="/logoYabalma.svg"
+      <div className="grid grid-cols-8 items-center  gap-8 w-60">
+          <div className="col-span-8 flex flex-row gap-4 justify-center items-center rounded-xl">
+        <img
+              src="/logo.jpg"
               alt="Image"
-              width={70} 
-              height={70}
-              className="h-full w-full object-cover rounded-2xl dark:brightness-[0.2] dark:grayscale"
+              width={800} 
+              height={800}
+              className="h-14 w-14 object-cover rounded-full"
             />
-            <div className="items-center justify-center h-full text-black flex">YABALMA</div>
-        </div>
-        <div className="col-span-2">
-        {/* <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="rounded-full bg-white shadow-sm">
-                <ChevronDown className="h-5 w-5" />
-                <span className="sr-only">Toggle user menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu> */}
+            <div className="items-start font-extrabold text-red-700 flex flex-col  justify-center h-full  ">
+            <div>{user?.role == "etudiant"? "Etudiant":"Professeur"}</div>
+                
+                <div className="text-black">{user?.prenom} {user?.nom}</div>
+            </div>
         </div>
       </div>
     

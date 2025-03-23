@@ -1,24 +1,20 @@
-import express from 'express';
-import {
-    deleteCopie,
-    evaluateCopie,
-    getAllCopieByIdSujet,
-    getCopieByEtudiantAndSujet,
-    getCopieById,
-    getAllCopiesByIdEtudiant,  
-    submitCopie,
-    updateCopie,
-} from '../controllers/copieController.js';
+import { Router } from 'express';
+import multer from 'multer';
+import * as copieController from '../controllers/copieController.js';
 
-const router = express.Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-router.get('/sujet/:idsujet', getAllCopieByIdSujet); 
-router.get('/etudiant/:idetudiant/sujet/:idsujet', getCopieByEtudiantAndSujet); 
-router.get('/:id', getCopieById);
-router.get('/etudiant/:idetudiant', getAllCopiesByIdEtudiant);  
-router.post('/', submitCopie);
-router.post('/evaluate', evaluateCopie); 
-router.put('/:id', updateCopie); 
-router.delete('/:id', deleteCopie);
+const router = Router();
+
+router.post('/', upload.single('file'), copieController.addCopie);
+router.get('/sujet/:idsujet', copieController.getAllCopieByIdSujet);
+router.get('/utilisateur/:idutilisateur', copieController.getAllCopieByIdUser);
+router.get('/:idsujet/:idutilisateur', copieController.getCopieByIdSujetAndUser);
+router.put('/:idcopie', upload.single('file'), copieController.updateCopie);
+router.put('/note/:idcopie', copieController.confirmNoteCopie);
+router.delete('/:idcopie', copieController.deleteCopie);
 
 export default router;
+
+

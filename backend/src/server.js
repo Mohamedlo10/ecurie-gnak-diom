@@ -2,7 +2,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import sql from './config/db.js';
-import PdfParse from 'pdf-parse';
+// import PdfParse from 'pdf-parse';
 import correctionRoutes from './routes/correctionRoutes.js';
 import coursRoutes from './routes/coursRoutes.js';
 import sujetRoutes from './routes/sujetRoutes.js';
@@ -25,6 +25,7 @@ app.use(cors());
 (async () => {
   try {
     await sql`SELECT 1`;
+    // console.log(process.env.JWT_SECRET);
     console.log("✅ Connexion à PostgreSQL réussie !");
   } catch (error) {
     console.error("❌ Erreur de connexion à PostgreSQL :", error);

@@ -16,7 +16,7 @@ export const protect = async (req, res, next) => {
     
     // Vérifier le token
     try {
-      const decoded = jwt.verify(token, '2b744e2124e26c396be56e55d472990e79ba744c4f196160adcc1b35488b16c1a7bed28a14118a9997ad8b0744e3a565895249417a6d08378d1f74f704e2a441');  // fii woroul dara apres ma deff ko ci ci .env
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);  // fii woroul dara apres ma deff ko ci ci .env
 
       // Vérifier si l'utilisateur existe dans la base de données
       const { data: users, error } = await supabase
