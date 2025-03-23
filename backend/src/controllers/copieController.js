@@ -1,8 +1,8 @@
-import * as copieModel from "../models/copieModel.js";
-import * as correctionModel from "../models/correctionModel.js";
-import supabase from "../config/supabase.js";
 import axios from "axios";
 import pdfParse from 'pdf-parse';
+import supabase from "../config/supabase.js";
+import * as copieModel from "../models/copieModel.js";
+import * as correctionModel from "../models/correctionModel.js";
 
 
 export const addCopie = async (req, res) => {
@@ -187,6 +187,16 @@ export const getAllCopieByIdSujet = async (req, res) => {
   }
 };
 
+export const getAllCopieByIdUser = async (req, res) => {
+  try {
+    const copies = await copieModel.getAllCopieByIdUser(req.params.idutilisateur);
+    res.status(200).json(copies);
+  } catch (error) {
+    console.error("Erreur récupération copies :", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const getCopieByIdSujetAndUser = async (req, res) => {
   try {
     const { idsujet, idutilisateur } = req.params;
@@ -238,6 +248,18 @@ export const updateCopie = async (req, res) => {
   } catch (error) {
     console.error("Erreur mise à jour copie :", error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const confirmNoteCopie = async (req, res) => {
+  try {
+      const {  notefinal} = req.body;
+    const { idcopie } = req.params;
+      console.log(req.body);
+      const updatedCopie = await copieModel.confirmNoteCopie(idcopie, notefinal);
+      res.status(200).json(updatedCopie);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
   }
 };
 

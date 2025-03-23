@@ -2,7 +2,19 @@
 
 export const getSujetByidCours = async (idCours:string) => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BACK}/api/sujet/cours/${idCours}`);
+    if (!res.ok) throw new Error("Erreur lors de la récupération des sujets dans ce cours");
+    return res.json();
+  };
+
+  export const getSujetByidProf = async (idutilisateur:string) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BACK}/api/sujet/professeur/${idutilisateur}`);
     if (!res.ok) throw new Error("Erreur lors de la récupération des sujets du prof");
+    return res.json();
+  };
+
+  export const getSujetByidEtudiant = async (idutilisateur:string) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BACK}/api/sujet/etudiant/${idutilisateur}`);
+    if (!res.ok) throw new Error("Erreur lors de la récupération des sujets de l'eleve");
     return res.json();
   };
 

@@ -28,6 +28,16 @@ export const getAllSujetByIdCours = async (req, res) => {
   res.status(200).json(sujets);
 };
 
+export const getAllSujetByIdProf = async (req, res) => {
+  const sujets = await sujetModel.getAllSujetByIdProf(req.params.idutilisateur);
+  res.status(200).json(sujets);
+};
+
+export const getAllSujetByIdEtudiant = async (req, res) => {
+  const sujets = await sujetModel.getAllSujetByIdEtudiant(req.params.idutilisateur);
+  res.status(200).json(sujets);
+};
+
 export const getSujetById = async (req, res) => {
   const sujet = await sujetModel.getSujetById(req.params.idSujet);
   res.status(200).json(sujet);
