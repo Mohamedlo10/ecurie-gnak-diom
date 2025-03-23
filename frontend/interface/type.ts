@@ -41,6 +41,7 @@ export type Sujet={
   idsujet: string,
   idcours:string,
   nomsujet:string,
+  nomcours?:string,
   urlsujet:string,
   created_at:string,
   datesoumission:string
@@ -51,8 +52,17 @@ export type Copie = {
   idutilisateur: string;
   idsujet: string;
   noteia?: number | null;
+  nomsujet?:string,
   notefinal?: number | null;
   commentaire?: string | null;
   urlcopie: string;
+  created_at?: string;
+};
+
+
+export type Correction = {
+  idcorrection: string;
+  urlcorrection: string;
+  idsujet: string;
   created_at?: string;
 };

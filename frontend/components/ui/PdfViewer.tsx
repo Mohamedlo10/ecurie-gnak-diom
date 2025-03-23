@@ -3,16 +3,17 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 
 const PdfViewer = ({ pdfUrl }: { pdfUrl: string }) => {
-  return (
-    <a 
-    href={pdfUrl}
-     target="_blank"
-    rel="noopener noreferrer"
-    className="w-3/4 max-h-48 border rounded-xl hover:opacity-70 border-gray-300">
-      <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
-        <Viewer fileUrl={pdfUrl} />
-      </Worker>
-  {/*     <a
+	return (
+		<a
+			href={pdfUrl}
+			target="_blank"
+			rel="noopener noreferrer"
+			className="w-full max-h-44 border rounded-xl hover:opacity-70 border-gray-300">
+			<Worker
+				workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
+				<Viewer fileUrl={pdfUrl} />
+			</Worker>
+			{/*     <a
         href={pdfUrl}
         target="_blank"
         rel="noopener noreferrer"
@@ -20,8 +21,8 @@ const PdfViewer = ({ pdfUrl }: { pdfUrl: string }) => {
       >
         Ouvrir en plein écran
       </a> */}
-    </a>
-  );
+		</a>
+	);
 };
 
 export default PdfViewer;

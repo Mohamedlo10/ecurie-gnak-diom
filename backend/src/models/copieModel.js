@@ -18,6 +18,17 @@ export const getAllCopieByIdSujet = async (idsujet) => {
   `);
 };
 
+export const getAllCopieByIdUser = async (idutilisateur) => {
+  return (await sql`
+    SELECT copie.idcopie,copie.notefinal,copie.commentaire,copie.urlcopie,copie.created_at, utilisateur.nom, utilisateur.prenom,sujet.nomsujet,sujet.idsujet,cours.nomcours,cours.idcours
+    FROM copie
+    JOIN utilisateur ON copie.idutilisateur = utilisateur.idutilisateur
+    JOIN sujet ON copie.idsujet=sujet.idsujet
+    JOIN cours ON sujet.idcours = cours.idcours
+    WHERE copie.idutilisateur=${idutilisateur};
+  `);
+};
+
 export const getCopieById = async (idcopie) => {
   return (await sql`SELECT * FROM copie WHERE idcopie=${idcopie};`)[0];
 };
@@ -40,6 +51,13 @@ export const updateCopie = async (idcopie, urlcopie) => {
 export const updateNoteCopie = async(idcopie,noteia,commentaire) =>{
   return (await sql`
     UPDATE copie SET noteia=${noteia}, commentaire=${commentaire}
+    WHERE idcopie=${idcopie} RETURNING *;
+    `)[0];
+};
+
+export const confirmNoteCopie = async(idcopie,notefinal) =>{
+  return (await sql`
+    UPDATE copie SET notefinal=${notefinal}
     WHERE idcopie=${idcopie} RETURNING *;
     `)[0];
 };
