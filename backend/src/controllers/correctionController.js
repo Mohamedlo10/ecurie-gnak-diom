@@ -1,11 +1,12 @@
 import * as correctionModel from '../models/correctionModel.js';
 import * as sujetModel from '../models/sujetModel.js'; // Permet de récupérer l'URL du sujet
 import supabase from "../config/supabase.js";
-import pdfParse from 'pdf-parse';
+import pdf from 'pdf-parse';
 import PDFDocument from 'pdfkit';
 import axios from 'axios';
 import fs from 'fs';
 
+const pdfParse = pdf.default ? pdf.default : pdf;
 export const generateCorrection = async (req, res) => {
   const { idSujet } = req.params;
 
@@ -22,19 +23,37 @@ export const generateCorrection = async (req, res) => {
     console.log(response);
     let extractedText = " ";
     let pdfBuffer = Buffer.from(response.data);
-    console.log(pdfBuffer);
-    try {
-      const pdfData = await pdfParse(pdfBuffer);
-      extractedText = pdfData.text;
-      console.log("✅ Texte extrait du PDF :", extractedText);
-      pdfBuffer.fill(0); 
-      pdfBuffer = null;
-    } catch (error) {
-      console.error("Erreur d'extraction du texte :", error.message);
-      return res.status(500).json({ error: "Impossible de lire le fichier PDF." });
+    let reussite = false;
+    let essai = 0;
+    const maxEssai = 5; 
+
+    while (!reussite && essai < maxEssai) {
+      try {
+        essai += 1;
+        const pdfData = await pdfParse(pdfBuffer);
+        extractedText = pdfData.text;
+        console.log("✅ Texte extrait du PDF :", extractedText);
+        reussite = true;
+
+      } catch (error) {
+        console.error(`❌ Erreur d'extraction du texte (Essai ${essai}) :`, error.message);
+        
+        if (essai >= maxEssai) {
+          console.error("Nombre maximum d'essais atteint.");
+          return res.status(500).json({ error: "Impossible de lire le fichier PDF après plusieurs tentatives." });
+        }
+
+        // Optionnel : attendre un peu avant de réessayer (par ex. 1s)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
 
+    // Nettoyage après extraction réussie
+    pdfBuffer.fill(0);
+    pdfBuffer = null;
+
     const prompt = `
+    
       You are an expert teacher , responsible for creating concise answer key for the following exam:
       ${extractedText}
       Instructions:
@@ -47,7 +66,7 @@ export const generateCorrection = async (req, res) => {
     `;
 
     const ollamaResponse = await axios.post('http://localhost:11434/api/generate', {
-      model: "deepseek-r1:1.5b",
+      model: process.env.MODELE_IA,
       prompt: prompt,
       stream: false
     });
@@ -191,6 +210,7 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
       const copieResponse = await axios.get(urlcopie, { responseType: "arraybuffer" });
       const pdfData = await pdfParse(Buffer.from(copieResponse.data));
       copieText = pdfData.text;
+      console.log(copieText);
     } catch (err) {
       throw new Error("Impossible d'extraire le texte de la copie: " + err.message);
     }
@@ -201,30 +221,31 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
       const correctionResponse = await axios.get(correction.urlcorrection, { responseType: "arraybuffer" });
       const pdfDataCorrection = await pdfParse(Buffer.from(correctionResponse.data));
       correctionText = pdfDataCorrection.text;
+      console.log(correctionText);
     } catch (err) {
       throw new Error("Impossible d'extraire le texte du corrigé type: " + err.message);
     }
 
-    // Construire le prompt pour Ollama / Deepseek
+    // Construire le prompt pour Ollama / process.env.MODELE_IA
     const prompt = `
-Vous êtes un professeur expérimenté chargé d'évaluer une copie d'examen en comparant la réponse de l'étudiant avec le corrigé type.
-Corrigé type:
-${correctionText}
+      Vous êtes un professeur expérimenté chargé d'évaluer une copie d'examen en comparant la réponse de l'étudiant avec le corrigé type.
+      Corrigé type:
+      ${correctionText}
 
-Copie de l'étudiant:
-${copieText}
+      Copie de l'étudiant:
+      ${copieText}
 
-Instructions:
-- Analysez la copie en la comparant au corrigé type.
-- Attribuez une note sur 20 en tenant compte de la qualité, de la précision et de la complétude des réponses.
-- Fournissez un commentaire détaillé indiquant les points forts et les axes d'amélioration.
-Répondez uniquement sous forme de JSON avec le format suivant:
-{"note": <note_sur_20>, "commentaire": "<votre commentaire>"}
+      Instructions:
+      - Analysez la copie en la comparant au corrigé type.
+      - Attribuez une note sur 20 en tenant compte de la qualité, de la précision et de la complétude des réponses.
+      - Fournissez un commentaire détaillé indiquant les points forts et les axes d'amélioration.
+      Répondez uniquement sous forme de JSON avec le format suivant:
+      {"note": <note_sur_20>, "commentaire": "<votre commentaire>"}
     `;
 
     // Appel à Ollama
     const ollamaResponse = await axios.post("http://localhost:11434/api/generate", {
-      model: "deepseek-r1:1.5b",
+      model: process.env.MODELE_IA,
       prompt: prompt,
       stream: false
     });
