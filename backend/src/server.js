@@ -14,6 +14,7 @@ import plagiatRoutes from './routes/plagiatRoutes.js';
 import plagiatCopieRoutes from './routes/plagiatCopieRoutes.js';
 import suivreRoutes from './routes/suivreRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
+import statistiqueRoutes from './routes/statistiqueRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -61,6 +62,7 @@ app.use('/api/plagiat', plagiatRoutes);
 app.use('/api/plagiat-copie', plagiatCopieRoutes);
 app.use('/api/suivre', suivreRoutes);
 app.use('/api', chatbotRoutes);
+app.use('/api/statistiques', statistiqueRoutes);
 
 // Route introuvable
 app.use('*', (req, res) => {
