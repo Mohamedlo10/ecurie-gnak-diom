@@ -3,12 +3,12 @@ import pdfParse from 'pdf-parse';
 import supabase from "../config/supabase.js";
 import * as copieModel from "../models/copieModel.js";
 import * as correctionModel from "../models/correctionModel.js";
+import correctionQueue from '../services/fileCorrection.js';
 
 
 export const addCopie = async (req, res) => {
   try {
     const { idutilisateur, idsujet } = req.body;
-    console.log(idutilisateur, idsujet);
     const file = req.file;
     if (!file) {
       return res.status(400).json({ message: "Fichier manquant !" });
@@ -17,39 +17,27 @@ export const addCopie = async (req, res) => {
     const copie = await copieModel.addCopie(idutilisateur, idsujet, 'à ngeinteih plutard');
     const fileName = `${copie.idcopie}.pdf`;
 
-    const { error } = await supabase.storage
-      .from('copies')
-      .upload(fileName, file.buffer, { contentType: file.mimetype });
+    const { error } = await supabase.storage.from('copies').upload(fileName, file.buffer, { contentType: file.mimetype });
 
     if (error) throw error;
 
     const fileUrl = supabase.storage.from('copies').getPublicUrl(fileName).data.publicUrl;
     const updatedCopie = await copieModel.updateCopie(copie.idcopie, fileUrl);
-
- 
-  let resultCorrection;
-    try {
-      resultCorrection = await corrigerCopie(updatedCopie.idcopie, updatedCopie.urlcopie, idsujet);
-    } catch (err) {
-      // S'il y a un souci lors de la correction, on peut renvoyer la copie créée
-      // mais indiquer l'erreur de correction
-      return res.status(500).json({
-        message: "Copie créée, mais erreur lors de la correction.",
-        copie: updatedCopie,
-        error: err.message
+    correctionQueue.add(() => corrigerCopie(updatedCopie.idcopie, updatedCopie.urlcopie, idsujet))
+      .then(resultCorrection => {
+        console.log("✅ Correction terminée pour la copie : ", updatedCopie.idcopie);
+      })
+      .catch(err => {
+        console.error("❌ Erreur lors de la correction de la copie : ", updatedCopie.idcopie, err);
       });
-    }
 
-    // Si tout s'est bien passé, on renvoie la copie finale avec la note/commentaire
     return res.status(201).json({
-      message: "Copie créée et corrigée avec succès.",
-      note: resultCorrection.note,
-      commentaire: resultCorrection.commentaire,
-      data: resultCorrection.copie
+      message: "Copie créée et correction en cours.",
+      data: updatedCopie
     });
 
   } catch (error) {
-    console.error("Erreur création + correction copie :", error);
+    console.error("Erreur création copie :", error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -59,19 +47,17 @@ export const addCopie = async (req, res) => {
 
 export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
   try {
-
     const correction = await correctionModel.getCorrectionByIdSujet(idsujet);
     if (!correction || !correction.urlcorrection) {
       throw new Error("Corrigé type non trouvé pour ce sujet.");
     }
-    // Extraction de la copie
     let copieText = "";
     while (true) {
       try {
         const copieResponse = await axios.get(urlcopie, { responseType: "arraybuffer" });
         const pdfData = await pdfParse(Buffer.from(copieResponse.data));
         copieText = pdfData.text;
-        break; // Extraction réussie, on sort de la boucle
+        break; 
       } catch (err) {
         console.error("Impossible d'extraire le texte de la copie: " + err.message);
         // Attendre 1 seconde avant de réessayer
@@ -93,17 +79,14 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
-
-     
+    
     const prompt = `
     You are an experienced exam evaluator. You are provided with two texts: a "Model Answer" and a "Student Submission". Your task is to carefully compare the Student Submission with the Model Answer and evaluate its overall quality based on the following criteria:
     - Accuracy: How correct are the answers compared to the model answer?
     - Completeness: Does the submission address all parts of the exam question?
     - Clarity and Organization: Is the response well-structured and easy to follow?
     - Depth and Reasoning: Does the submission demonstrate thorough understanding with clear reasoning?
-
     Based on your analysis, assign a grade between 0 and 20 and provide a detailed evaluation comment that highlights strengths, points out weaknesses, and offers specific suggestions for improvement.
-
     IMPORTANT:
     - Your response MUST be a single, valid JSON object.
     - DO NEVER NEVER NEVER include any extra text,  markdown formatting, triple backticks(\`\`\`), or any other characters outside the JSON.
@@ -116,11 +99,9 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
     }
     Not adding any style in all file.
     
-
-
     Model Answer:
     ${correctionText}
-
+    
     Student Submission:
     ${copieText}
   `;

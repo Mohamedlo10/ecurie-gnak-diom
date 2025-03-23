@@ -22,7 +22,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: 'http://localhost:5000', // ou '*' en développement
+  origin: 'http://localhost:5000', 
   credentials: true
 }));
 

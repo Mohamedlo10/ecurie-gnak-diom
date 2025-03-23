@@ -4,7 +4,7 @@ import * as sujetModel from "../models/sujetModel.js";
 
 export const createSujet = async (req, res) => {
   try {
-      const { nomSujet, idCours,datesoumission } = req.body;
+      const { nomSujet, idCours, datesoumission } = req.body;
       const file = req.file;
       console.log(nomSujet, idCours, datesoumission);
       const sujet = await sujetModel.createSujet(nomSujet, '', idCours, datesoumission);

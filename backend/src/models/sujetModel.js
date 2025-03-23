@@ -3,8 +3,8 @@ import sql from "../config/db.js";
 
 export const createSujet = async (nomSujet, urlSujet, idCours, datesoumission) => {
   const query = await sql`
-  'INSERT INTO sujet(nomSujet, urlSujet, idCours, datesoumission)
-    VALUES(${nomSujet}, ${urlSujet}, ${idCours},${datesoumission})
+  INSERT INTO sujet(nomSujet, urlSujet, idCours, datesoumission)
+    VALUES(${nomSujet}, ${urlSujet}, ${idCours}, ${datesoumission})
     RETURNING *;
   `;
   return query[0];
