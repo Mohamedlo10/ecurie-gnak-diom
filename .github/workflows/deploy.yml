@@ -52,5 +52,5 @@ jobs:
             nvm use 18      # Utilise la version de Node.js
             cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/frontend  # Navigue vers le répertoire du frontend
             npm install  # Installe les dépendances si nécessaire
-            npm run dev
+            npm run dev &
           EOF
