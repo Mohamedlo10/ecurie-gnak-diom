@@ -1,0 +1,41 @@
+name: Déploiement Automatique vers le Serveur
+
+# Déclenchement du workflow sur un push vers la branche `back`
+on:
+  push:
+    branches:
+      - back  # Lorsque tu fais un `pushh` sur la branche 'back', le workflow sera exécuté
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Utilisation d'une machine virtuelle Ubuntu pour exécuter le workflow
+
+    steps:
+      # Étape 1 : Cloner le code du dépôt GitHub
+      - name: Checkout code
+        uses: actions/checkout@v4  # Récupère le code source de la branche `back`
+
+      # Étape 2 : Configurer SSH pour accéder au serveur
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3  # Utilise l'agent SSH pour l'authentification
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}  # Utilisation de la clé privée SSH stockée dans les secrets GitHub
+
+      # Étape 3 : Démarrer le backend (Node.js)
+      - name: Start Backend (Node.js)
+        run: |
+          ssh -i ~/.ssh/${{ secrets.SSH_KEY }} ${{ secrets.username }} << 'EOF'
+            cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/backend  # Navigue vers le répertoire du backend
+            npm install  # Installe les dépendances si nécessaire
+            node /src/server.js  # Démarre le serveur Node.js
+          EOF
+
+      # Étape 4 : Démarrer le frontend (Next.js)
+      - name: Start Frontend (Next.js)
+        run: |
+          ssh -i ~/.ssh/${{ secrets.SSH_KEY }} ${{ secrets.username }} << 'EOF'
+            cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/frontend  # Navigue vers le répertoire du frontend
+            npm install  # Installe les dépendances si nécessaire
+            npm run build  # Génére le build pour la production
+            npm start  # Démarre le serveur Next.js
+          EOF
