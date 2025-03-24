@@ -37,7 +37,7 @@ jobs:
             nvm use 16      # Utilise la version de Node.js
             cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/backend # Navigue vers le répertoire du backend
             npm install  # Installe les dépendances si nécessaire
-            node ./src/server.js  # Démarre le serveur Node.js
+            node ./src/server.js &  # Démarre le serveur Node.js
           EOF
 
       # Étape 5 : Démarrer le frontend (Next.js)
