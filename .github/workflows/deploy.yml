@@ -22,7 +22,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_KEY }}  # Utilisation de la clé privée SSH stockée dans les secrets GitHub
 
       - name: Test SSH connection
-        run: ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} elite@lhacksrt.tech "echo 'SSH Connection Successful'"
+        run: ssh  -i ${{ secrets.SSH_KEY }} elite@lhacksrt.tech "echo 'SSH Connection Successful'"
       # Étape 3 : Démarrer le backend (Node.js)
       - name: Start Backend (Node.js)
         run: |
