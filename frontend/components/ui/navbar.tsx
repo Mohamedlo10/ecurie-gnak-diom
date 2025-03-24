@@ -1,6 +1,5 @@
 'use client'
 import { User } from "@/interface/type";
-import { getSupabaseUser } from "@/lib/authMnager";
 
 import { CSSProperties, useEffect, useState } from "react";
 import BeatLoader from "react-spinners/BeatLoader";
@@ -11,15 +10,17 @@ const override: CSSProperties = {
 };
 
 function Navbar() {
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<User>(getSupabaseUser());
   let [color, setColor] = useState("#ffffff");
   const [isLoading, setIsLoading] = useState(false);
-
+  function getSupabaseUser() {
+		const sessionData = localStorage.getItem('user_session');
+		return sessionData ? JSON.parse(sessionData) : null;
+	  }
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true)
       try {
-        setUser(getSupabaseUser())
       } catch (error) {
         console.error("Error fetching user details:", error)
       } finally {
