@@ -1,7 +1,7 @@
 import * as StatistiqueModel from "../models/statistiqueModel.js";
 
 export const afficherStatistiquesProfesseur = async (req, res) => {
-    const { idutilisateur } = req.body; // <= correction ici
+    const { idutilisateur } = req.params; // <= correction ici
     console.log("idutilisateur reçu :", idutilisateur);
 
     try {

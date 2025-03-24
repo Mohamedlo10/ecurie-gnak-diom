@@ -1,20 +1,20 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import sql from './config/db.js';
 import session from 'express-session';
+import sql from './config/db.js';
+import chatbotRoutes from './routes/chatbotRoutes.js';
+import copieRoutes from './routes/copieRoutes.js';
 import correctionRoutes from './routes/correctionRoutes.js';
 import coursRoutes from './routes/coursRoutes.js';
+import etudiantRoutes from './routes/etudiantRoutes.js';
+import plagiatCopieRoutes from './routes/plagiatCopieRoutes.js';
+import plagiatRoutes from './routes/plagiatRoutes.js';
+import professeurRoutes from './routes/professeurRoutes.js';
+import statistiqueRoutes from './routes/statistiqueRoutes.js';
+import suivreRoutes from './routes/suivreRoutes.js';
 import sujetRoutes from './routes/sujetRoutes.js';
 import utilisateurRoutes from './routes/utilisateurRoutes.js';
-import copieRoutes from './routes/copieRoutes.js';
-import etudiantRoutes from './routes/etudiantRoutes.js';
-import professeurRoutes from './routes/professeurRoutes.js';
-import plagiatRoutes from './routes/plagiatRoutes.js';
-import plagiatCopieRoutes from './routes/plagiatCopieRoutes.js';
-import suivreRoutes from './routes/suivreRoutes.js';
-import chatbotRoutes from './routes/chatbotRoutes.js';
-import statistiqueRoutes from './routes/statistiqueRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -23,7 +23,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: 'http://localhost:5000', 
+  origin: '*', // ou '*' en développement
   credentials: true
 }));
 
