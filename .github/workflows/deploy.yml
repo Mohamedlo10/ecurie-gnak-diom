@@ -23,12 +23,12 @@ jobs:
       # Étape 3 : Vérifier la connexion SSH
       - name: Test SSH connection
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.username }} "echo 'SSH Connection Successful'"
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 ${{ secrets.username }} "echo 'SSH Connection Successful'"
 
       # Étape 4 : Démarrer le backend (Node.js)
       - name: Start Backend (Node.js)
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.username }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 ${{ secrets.username }} << 'EOF'
             # Charger nvm
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Si nvm est installé, le charger
@@ -43,7 +43,7 @@ jobs:
       # Étape 5 : Démarrer le frontend (Next.js)
       - name: Start Frontend (Next.js)
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.username }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 ${{ secrets.username }} << 'EOF'
             # Charger nvm
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Si nvm est installé, le charger
