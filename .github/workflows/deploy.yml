@@ -23,12 +23,18 @@ jobs:
       # Étape 3 : Vérifier la connexion SSH
       - name: Test SSH connection
         run: |
-          ssh -o StrictHostKeyChecking=no  ${{ secrets.USERNAME }} "echo 'SSH Connection Successful'"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.username }} "echo 'SSH Connection Successful'"
 
       # Étape 4 : Démarrer le backend (Node.js)
       - name: Start Backend (Node.js)
         run: |
-          ssh -o StrictHostKeyChecking=no  ${{ secrets.USERNAME }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.username }} << 'EOF'
+            # Charger nvm
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Si nvm est installé, le charger
+            # Installer la version de Node.js et npm, si ce n'est pas déjà fait
+            nvm install 16  # Utilise la version que tu as besoin
+            nvm use 16      # Utilise la version de Node.js
             cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/backend  # Navigue vers le répertoire du backend
             npm install  # Installe les dépendances si nécessaire
             node /src/server.js  # Démarre le serveur Node.js
@@ -37,7 +43,13 @@ jobs:
       # Étape 5 : Démarrer le frontend (Next.js)
       - name: Start Frontend (Next.js)
         run: |
-          ssh -o StrictHostKeyChecking=no  ${{ secrets.USERNAME }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.username }} << 'EOF'
+            # Charger nvm
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Si nvm est installé, le charger
+            # Installer la version de Node.js et npm, si ce n'est pas déjà fait
+            nvm install 16  # Utilise la version que tu as besoin
+            nvm use 16      # Utilise la version de Node.js
             cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/frontend  # Navigue vers le répertoire du frontend
             npm install  # Installe les dépendances si nécessaire
             npm run build  # Génére le build pour la production
