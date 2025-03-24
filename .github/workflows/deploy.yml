@@ -53,5 +53,5 @@ jobs:
             cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/frontend  # Navigue vers le répertoire du frontend
             npm install  # Installe les dépendances si nécessaire
             npm run build  # Génére le build pour la production
-            npm start  # Démarre le serveur Next.js
+            npm run start  # Démarre le serveur Next.js
           EOF
