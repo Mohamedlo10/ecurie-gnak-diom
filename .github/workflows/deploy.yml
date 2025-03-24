@@ -53,4 +53,9 @@ jobs:
             cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/frontend  # Navigue vers le répertoire du frontend
             npm install  # Installe les dépendances si nécessaire
             npm run dev &
+            until curl --silent --head http://localhost:3000 | grep "200 OK"; do
+            echo "Waiting for Next.js to be ready..."
+            sleep 5
+            done
+            echo "Next.js is up and running!"
           EOF
