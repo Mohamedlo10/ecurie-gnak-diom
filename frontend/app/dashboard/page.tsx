@@ -1,10 +1,17 @@
 "use client";
 
-import { User } from "@/interface/type";
+import EtudiantsCoursComponent from "@/components/ui/home/etudiants-cours-chart";
+import EtudiantMoyenneCours from "@/components/ui/home/moyenne-cours";
+import MoyenneGeneraleEtudiant from "@/components/ui/home/moyenneGenerale";
+import SujetDetailsComponent from "@/components/ui/home/note-sujet-details";
+import EtudiantsRenduSujetComponent from "@/components/ui/home/sujets-etudiants-rendus";
+import SujetTraiterParEtudiant from "@/components/ui/home/sujetTraiteParEtudiant";
+import { Statistique, User } from "@/interface/type";
 import { getSupabaseUser } from "@/lib/authMnager";
 import { useRouter } from "next/navigation";
 import { CSSProperties, useEffect, useState } from "react";
 import BeatLoader from "react-spinners/BeatLoader";
+import { getStatistique } from "../api/stastique/query";
 
 const override: CSSProperties = {
 	display: "block",
@@ -16,15 +23,45 @@ export default function DashboardPage() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [user, setUser] = useState<User>(getSupabaseUser());
 	let [color, setColor] = useState("#ffffff");
+	const [statistique, setstatistique] = useState<Statistique>();
 
 	const router = useRouter();
 	async function fetchData() {
 		setIsLoading(true);
-		try {
-		} catch (error) {
-			console.error("Error fetching user details:", error);
-		} finally {
-			setIsLoading(false);
+		if (user.role == "professeur") {
+			try {
+				if (user.idutilisateur) {
+					const data: any = await getStatistique(user.idutilisateur);
+					if (data) {
+						console.log(data);
+						setstatistique(data);
+					}
+				}
+			} catch (error) {
+				console.error(
+					"Erreur lors de la recuperation de la correction details:",
+					error
+				);
+			} finally {
+				setIsLoading(false);
+			}
+		} else if (user.role == "etudiant") {
+			try {
+				if (user.idutilisateur) {
+					/* const data: any = await getStatistique(user.idutilisateur);
+					if (data) {
+						console.log(data);
+						setstatistique(data);
+					} */
+				}
+			} catch (error) {
+				console.error(
+					"Erreur lors de la recuperation de la correction details:",
+					error
+				);
+			} finally {
+				setIsLoading(false);
+			}
 		}
 	}
 
@@ -49,25 +86,27 @@ export default function DashboardPage() {
 		);
 	}
 	return (
-		<div className="chart-wrapper max-h-[90vh]  overflow-y-auto mx-auto flex max-w-8xl flex-col flex-wrap items-start justify-center gap-2 p-6 sm:flex-row sm:p-8">
-			<div className="grid w-full mx-auto gap-2 sm:grid-cols-1 lg:grid-cols-1 ">
-				<div className="w-full grid grid-cols-2 gap-2">
-					<div className=" grid grid-cols-1 gap-2">
-						{/* <BarChartComponent/> */}
-						<div className=" grid grid-cols-2 gap-2">
-							{/* <ClientPays /> */}
-
-							{/* <GpPays/> */}
-						</div>
-					</div>
-					<div className=" grid grid-cols-1 gap-2">
-						<div className=" grid grid-cols-2 gap-2 ">
-							<div className="">{/* <CirculaireComponent/> */}</div>
-							<div className="">{/* <Commentaire/> */}</div>
-						</div>
-					</div>
+		<div className="chart-wrapper max-h-[85vh]  overflow-y-auto mx-auto flex max-w-8xl flex-col flex-wrap items-start justify-center gap-2 p-6 sm:flex-row sm:p-8">
+			{statistique && (
+				<div className="w-full h-full grid mx-auto grid-cols-2 px-4 gap-12">
+					<EtudiantsCoursComponent
+						nbInscritsCours={statistique.nbInscritsCours}
+					/>
+					<SujetDetailsComponent noteSujets={statistique.notesSujets} />
+					<EtudiantMoyenneCours
+						moyenneParCours={statistique.moyennesParCours}
+					/>
+					<EtudiantsRenduSujetComponent
+						nbEtudiantsParSujet={statistique.nbEtudiantsParSujet}
+					/>
+					<MoyenneGeneraleEtudiant
+						moyenneEtudiant={statistique.moyennesEtudiants}
+					/>
+					<SujetTraiterParEtudiant
+						sujetsTraitesParEtudiant={statistique.sujetsTraitesParEtudiant}
+					/>
 				</div>
-			</div>
+			)}
 		</div>
 	);
 }

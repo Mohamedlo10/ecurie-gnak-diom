@@ -66,3 +66,59 @@ export type Correction = {
   idsujet: string;
   created_at?: string;
 };
+
+
+export type NoteSujet = {
+  idsujet: string;
+  nomsujet: string;
+  moyenne: string | null;
+  note_min: string | null;
+  note_max: string | null;
+  ecart_type: string | null;
+  nombre_eleves_ayant_moyenne: string;
+  nombre_eleves_sans_moyenne: string;
+};
+
+export type NbEtudiantsParSujet = {
+  idsujet: string;
+  nomsujet: string;
+  nombre_etudiants: string;
+};
+
+export type MoyenneEtudiant = {
+  idutilisateur: string;
+  nom: string;
+  prenom: string;
+  moyenne_generale: string;
+};
+
+export type MoyenneParCours = {
+  idutilisateur: string;
+  nom: string;
+  prenom: string;
+  idcours: string;
+  nomcours: string;
+  moyenne_cours: string;
+};
+
+export type SujetsTraitesParEtudiant = {
+  idutilisateur: string;
+  nom: string;
+  prenom: string;
+  nombre_sujets_traites: string;
+};
+
+export type NbInscritsCours = {
+  idcours: string;
+  nomcours: string;
+  nombre_etudiants_inscrits: string;
+};
+
+export type Statistique = {
+  notesSujets: NoteSujet[];
+  nbEtudiantsParSujet: NbEtudiantsParSujet[];
+  moyennesEtudiants: MoyenneEtudiant[];
+  moyennesParCours: MoyenneParCours[];
+  sujetsTraitesParEtudiant: SujetsTraitesParEtudiant[];
+  nbInscritsCours: NbInscritsCours[];
+};

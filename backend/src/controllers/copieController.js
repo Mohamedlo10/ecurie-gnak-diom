@@ -13,16 +13,19 @@ export const addCopie = async (req, res) => {
     if (!file) {
       return res.status(400).json({ message: "Fichier manquant !" });
     }
-
+    console.log(idutilisateur, idsujet);
     const copie = await copieModel.addCopie(idutilisateur, idsujet, 'à ngeinteih plutard');
-    const fileName = `${copie.idcopie}.pdf`;
+    const fileName = `${copie.idcopie}`;
+    console.log(fileName);
 
     const { error } = await supabase.storage.from('copies').upload(fileName, file.buffer, { contentType: file.mimetype });
 
     if (error) throw error;
 
     const fileUrl = supabase.storage.from('copies').getPublicUrl(fileName).data.publicUrl;
+    console.log(copie.idcopie, fileUrl);
     const updatedCopie = await copieModel.updateCopie(copie.idcopie, fileUrl);
+    console.log(updatedCopie.idcopie, updatedCopie.urlcopie, idsujet);
     correctionQueue.add(() => corrigerCopie(updatedCopie.idcopie, updatedCopie.urlcopie, idsujet))
       .then(resultCorrection => {
         console.log("✅ Correction terminée pour la copie : ", updatedCopie.idcopie);
@@ -57,6 +60,7 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
         const copieResponse = await axios.get(urlcopie, { responseType: "arraybuffer" });
         const pdfData = await pdfParse(Buffer.from(copieResponse.data));
         copieText = pdfData.text;
+        // console.log(copieText);
         break; 
       } catch (err) {
         console.error("Impossible d'extraire le texte de la copie: " + err.message);
@@ -72,6 +76,7 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
         const correctionResponse = await axios.get(correction.urlcorrection, { responseType: "arraybuffer" });
         const pdfDataCorrection = await pdfParse(Buffer.from(correctionResponse.data));
         correctionText = pdfDataCorrection.text;
+        // console.log(correctionText);
         break; // Extraction réussie, on sort de la boucle
       } catch (err) {
         console.error("Impossible d'extraire le texte du corrigé: " + err.message);
@@ -99,12 +104,26 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
     }
     Not adding any style in all file.
     
+
+
+
+
+    Student Submission:
+    ${copieText}
+
+
+
+
+
     Model Answer:
     ${correctionText}
     
-    Student Submission:
-    ${copieText}
+
+
+
+
   `;
+  console.log(prompt);
 
     
 
@@ -115,7 +134,7 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
       const ollamaResponse = await axios.post(
         "http://localhost:11434/api/generate",
         {
-          model: "deepseek-r1:1.5b",
+          model: process.env.MODELE_IA,
           prompt: prompt,
           stream: false
         },
