@@ -9,6 +9,6 @@ function PdfViewer({ pdfUrl }: PdfViewerProps) {
 			title="PDF Viewer"
 		/>
 	);
-}
+} 
 
 export default PdfViewer;
