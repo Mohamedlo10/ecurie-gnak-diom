@@ -20,34 +20,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}  # Utilisation de la clé privée SSH stockée dans les secrets GitHub
 
-      # Étape 3 : Build du Backend (Node.js)
-      - name: Build Backend (Node.js)
-        run: |
-          # Se rendre dans le répertoire du backend
-          cd backend
-          # Installer les dépendances
-          npm install
-          # Démarrer le serveur (tu peux aussi utiliser PM2 pour gérer le processus en production)
-          node /src/server.js
-
-      # Étape 4 : Build du Frontend (Next.js)
-      - name: Build Frontend (Next.js)
-        run: |
-          # Se rendre dans le répertoire du frontend
-          cd frontend
-          # Installer les dépendances
-          npm install
-          # Générer le build de production
-          npm run build
-          # Si tu utilises PM2 pour Next.js, redémarre l'application ici (si nécessaire)
-          npm start
-
       # Étape 5 : Déployer le code sur le serveur
       - name: Deploy to server
         run: |
           # Copier les fichiers backend et frontend sur le serveur via SCP
-          scp -r ./backend ${{ secrets.username }}:/chemin/vers/dossier/backend
-          scp -r ./frontend ${{ secrets.username }}:/chemin/vers/dossier/frontend
+          scp -r ./backend ${{ secrets.username }}:~
+          scp -r ./frontend ${{ secrets.username }}:~
           
         env:
           SSH_AUTH_SOCK: ${{ steps.ssh-agent.outputs.ssh-auth-sock }}
