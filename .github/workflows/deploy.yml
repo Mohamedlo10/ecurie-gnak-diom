@@ -3,7 +3,7 @@ name: Déploiement Automatique vers le Serveur
 on:
   push:
     branches:
-      -back
+      - main
 
 jobs:
   deploy:
