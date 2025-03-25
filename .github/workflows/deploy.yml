@@ -3,7 +3,7 @@ name: Déploiement Automatique vers le Serveur
 on:
   push:
     branches:
-      - back  # Le workflow se déclenche sur la branche 'back'
+      -back
 
 jobs:
   deploy:
