@@ -3,67 +3,29 @@ name: Déploiement Automatique vers le Serveur
 on:
   push:
     branches:
-      - back  # Le workflow se déclenche lorsque tu fais un `push` sur la branche 'back'
+      -back
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Utilisation d'une machine virtuelle Ubuntu pour l'exécution
+    runs-on: ubuntu-latest  # Utilise une machine virtuelle Ubuntu pour l'exécution
 
     steps:
-      # Étape 1 : Cloner le code du dépôt GitHub
+      # Étape 1 : Cloner le code du dépôt
       - name: Checkout code
-        uses: actions/checkout@v4  # Récupère le code source de la branche `back`
+        uses: actions/checkout@v4
 
       # Étape 2 : Configurer SSH pour accéder au serveur
       - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3  # Utilise l'agent SSH pour l'authentification
+        uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}  # Utilisation correcte de la clé privée SSH stockée dans les secrets GitHub
+          ssh-private-key: ${{ secrets.SSH_KEY }}  # Utilisation de la clé privée SSH stockée dans les secrets GitHub
 
-      # Étape 3 : Vérifier la connexion SSH
-      - name: Test SSH connection
+      # Étape 5 : Déployer le code sur le serveur
+      - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 ${{ secrets.username }} "echo 'SSH Connection Successful'"
-
-      # Étape 4 : Démarrer le backend (Node.js)
-      - name: Start Backend (Node.js)
-        run: |
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 ${{ secrets.username }} << 'EOF'
-            # Charger nvm
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Si nvm est installé, le charger
-            # Installer la version de Node.js et npm, si ce n'est pas déjà fait
-            nvm install 16  # Utilise la version que tu as besoin
-            nvm use 16      # Utilise la version de Node.js
-            cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/backend # Navigue vers le répertoire du backend
-            npm install  # Installe les dépendances si nécessaire
-            node ./src/server.js &  # Démarre le serveur Node.js
-             # Vérifier si le backend est démarré
-            until curl --silent --head http://localhost:5000 | grep "200 OK"; do 
-              echo "Waiting for backend to be ready..."
-              sleep 5
-            done
-            echo "Backend is up and running!"
-          EOF
-
-      # Étape 5 : Démarrer le frontend (Next.js)
-      - name: Start Frontend (Next.js)
-        run: |
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 ${{ secrets.username }} << 'EOF'
-            # Charger nvm
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Si nvm est installé, le charger
-            # Installer la version de Node.js et npm, si ce n'est pas déjà fait
-            nvm install 18  # Utilise la version que tu as besoin
-            nvm use 18      # Utilise la version de Node.js
-            cd /var/www/elite/projet_sgbd/ecurie-gnak-diom-back/frontend  # Navigue vers le répertoire du frontend
-            npm install  # Installe les dépendances si nécessaire
-            npm run build
-            npm run start &
-            until curl --silent --head http://localhost:3000 | grep "200 OK"; do
-            echo "Waiting for Next.js to be ready..."
-                        echo "Connecting to backend at ${{ secrets.NEXT_PUBLIC_URL_BACK }}"
-            sleep 5
-            done
-            echo "Next.js is up and running!"
-          EOF
+          # Copier les fichiers backend et frontend sur le serveur via SCP
+          scp -r ./backend ${{ secrets.username }}:~
+          scp -r ./frontend ${{ secrets.username }}:~
+          
+        env:
+          SSH_AUTH_SOCK: ${{ steps.ssh-agent.outputs.ssh-auth-sock }}
