@@ -1,8 +1,9 @@
 
+import Cookies from 'js-cookie';
 
 
 export function getSupabaseUser() {
-    const sessionData = localStorage.getItem('user_session');
+    const sessionData = Cookies.get('user');
     return sessionData ? JSON.parse(sessionData) : null;
   }
  /*  async function getToken() {

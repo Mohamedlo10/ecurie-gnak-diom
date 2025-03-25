@@ -30,6 +30,7 @@
     "cookie": "^1.0.2",
     "date-fns": "^4.1.0",
     "jose": "^6.0.10",
+    "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.479.0",
     "next": "^15.2.1",
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "^19",

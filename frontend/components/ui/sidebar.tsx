@@ -1,6 +1,7 @@
 "use client";
 import { userDeConnection } from "@/app/api/utilisateur/query";
 import { User } from "@/interface/type";
+import { getSupabaseUser } from "@/lib/authMnager";
 import {
 	CircleSlash,
 	DockIcon,
@@ -29,10 +30,7 @@ function Sidebar() {
 	const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
 	const [isDialogOpen, setDialogOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	function getSupabaseUser() {
-		const sessionData = localStorage.getItem('user_session');
-		return sessionData ? JSON.parse(sessionData) : null;
-	  }
+
 	const [user, setUser] = useState<User>(getSupabaseUser());
 	let [color, setColor] = useState("#ffffff");
 	const [error, setError] = useState("");
@@ -68,8 +66,8 @@ function Sidebar() {
 		setError("");
 
 		userDeConnection();
-		localStorage.removeItem('role_user');
-		localStorage.removeItem('user_session');
+		localStorage.removeItem("role_user");
+		localStorage.removeItem("user_session");
 		router.push(`/`);
 		setIsLoading(false);
 	};

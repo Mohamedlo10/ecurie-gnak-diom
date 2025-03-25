@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 
 
 export const fetchUtilisateurs = async () => {
@@ -25,6 +26,12 @@ export const fetchUtilisateurs = async () => {
       }
   
       const data = await response.json();
+      const userJson = JSON.stringify(data.utilisateur);
+
+      Cookies.set('user', userJson, { expires: 1 });
+      Cookies.set('token', data.token, { expires: 1 });
+
+    
       return data;
     } catch (error) {
       console.error("Erreur de connexion:", error);
@@ -36,8 +43,8 @@ export const fetchUtilisateurs = async () => {
 
   export const userDeConnection = () => {
     try {
-      localStorage.removeItem('role_user');
-      localStorage.removeItem('user_session');
+      Cookies.remove('user');
+      Cookies.remove('token');
     } catch (error) {
       console.error("Erreur de connexion:", error);
       throw error; // Pour gérer l'erreur dans `handleAuth`
@@ -78,6 +85,10 @@ export const userInscription = async (
     }
 
     const data = await response.json();
+    const userJson = JSON.stringify(data.utilisateur);
+    Cookies.set('user', userJson, { expires: 1 });
+    Cookies.set('token', data.token, { expires: 1 });
+
     return data;
   } catch (error) {
     console.error("Erreur:", error);
