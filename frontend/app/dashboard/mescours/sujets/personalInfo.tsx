@@ -200,7 +200,16 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ sujet }) => {
 												user.role != "professeur" ? " w-2/3 " : "w-full"
 											}`}>
 											<PdfViewer pdfUrl={sujet.urlsujet} />
-											<div className="flex flex-row  gap-4  rounded-lg">
+											<div className="flex gap-1 my-3 w-[90%] items-center justify-center">
+												<a
+													href={sujet.urlsujet}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="text-base bg-black w-fit text-white hover:bg-zinc-400 font-bold leading-none cursor-pointer p-2 rounded-4xl">
+													Cliquez pour voir
+												</a>
+											</div>
+											<div className="flex flex-row  gap-4 mt-9 rounded-lg">
 												<div className="">
 													<div className="text-gray-500 text-sm ">
 														Date limite de soumission
@@ -303,7 +312,17 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ sujet }) => {
 											<div
 												className={`flex items-center justify-center w-full h-full`}>
 												<div className="flex flex-col w-2/3 h-full ">
-													<div className="h-72">
+													<div className="h-96 flex items-center justify-start flex-col gap-2">
+														<PdfViewer pdfUrl={copie.urlcopie} />
+														<div className="grid gap-1">
+															<a
+																href={copie.urlcopie}
+																target="_blank"
+																rel="noopener noreferrer"
+																className="text-base mt-2 bg-black text-white hover:bg-zinc-400 font-bold leading-none cursor-pointer p-2 rounded-4xl">
+																Cliquez pour voir
+															</a>
+														</div>
 														<div className="flex-row flex gap-3 ">
 															<div className="text-gray-500 text-sm sm:text-base">
 																Copie soumis le
@@ -327,8 +346,6 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ sujet }) => {
 																	})}
 															</div>
 														</div>
-														<PdfViewer pdfUrl={copie.urlcopie} />
-
 														<div className="flex-row flex gap-1 w-full items-center justify-center ">
 															<div
 																className={` font-bold   rounded-xl text-white p-2 ${

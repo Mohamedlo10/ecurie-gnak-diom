@@ -5,7 +5,7 @@ function PdfViewer({ pdfUrl }: PdfViewerProps) {
 	return (
 		<iframe
 			src={pdfUrl}
-			style={{ width: "100%", height: "350px" }}
+			style={{ width: "90%", height: "280px" }}
 			title="PDF Viewer"
 		/>
 	);

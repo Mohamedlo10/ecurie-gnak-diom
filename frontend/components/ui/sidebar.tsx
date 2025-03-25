@@ -92,8 +92,8 @@ function Sidebar() {
 	}
 
 	return (
-		<div className="h-[100vh]">
-			<div className="flex h-[8vh] items-center border-b px-4 lg:h-22 lg:px-6">
+		<div className="h-[100vh] bg-red-700">
+			<div className="flex  items-center border-b px-4 lg:h-22 lg:px-6">
 				<div className="flex items-center gap-4 font-semibold">
 					<Package2 className="h-8 w-8 p-2 bg-white text-red-700 rounded-full" />
 					<span className="text-white font-bold">ELITE</span>
