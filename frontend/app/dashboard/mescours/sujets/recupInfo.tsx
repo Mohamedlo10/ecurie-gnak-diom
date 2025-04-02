@@ -101,7 +101,7 @@ const RecupInfo = () => {
   return (
     <div className="flex flex-col w-full flex-auto min-w-0">
       {/* Header */}
-      <div className=" w-full">
+      <div className="p-2 w-full">
         <button
           className="rounded-xl cursor-pointer hover:bg-zinc-200 p-1"
           onClick={handleRetour}

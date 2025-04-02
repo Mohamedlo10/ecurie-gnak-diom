@@ -103,7 +103,7 @@ const ChatBotInfo: React.FC<ChatBotInfoProps> = ({ sujetId }) => {
   };
 
   return (
-    <div className="flex flex-col max-h-[65vh]  max-w-xl mx-auto p-4">
+    <div className="flex flex-col max-h-[65vh] min-h-[60vh] max-w-xl mx-auto p-4">
       {/* Zone de messages */}
       <div className="flex-grow overflow-auto text-sm mb-4 p-4 bg-gray-100  overflow-y-auto rounded-lg">
         {messages.map((msg, index) => (
