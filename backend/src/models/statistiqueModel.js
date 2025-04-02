@@ -4,8 +4,8 @@ import sql from "../config/db.js";
 
 // Moyenne, Min, Max, Écart-type des notes par sujet du professeur connecté
 export const getStatistiquesNotesSujetsProf = async (idUtilisateur) => {
-    console.log(idUtilisateur);
-    const query = await sql`
+  console.log(idUtilisateur);
+  const query = await sql`
         SELECT
             s.idsujet,
             s.nomsujet,
@@ -21,12 +21,12 @@ export const getStatistiquesNotesSujetsProf = async (idUtilisateur) => {
         WHERE co.idutilisateur = ${idUtilisateur}
         GROUP BY s.idsujet, s.nomsujet;
     `;
-    return query;
+  return query;
 };
 
 // Nombre d'étudiants ayant soumis une copie par sujet du professeur connecté
 export const getNombreEtudiantsParSujetProf = async (idUtilisateur) => {
-    return await sql`
+  return await sql`
         SELECT
             s.idsujet,
             s.nomsujet,
@@ -41,7 +41,7 @@ export const getNombreEtudiantsParSujetProf = async (idUtilisateur) => {
 
 // Moyenne générale par étudiant (toutes matières confondues) pour les étudiants du professeur connecté
 export const getMoyenneGeneraleEtudiantsProf = async (idUtilisateur) => {
-    return await sql`
+  return await sql`
         SELECT
             u.idutilisateur,
             u.nom,
@@ -58,7 +58,7 @@ export const getMoyenneGeneraleEtudiantsProf = async (idUtilisateur) => {
 
 // Moyenne par cours suivis par étudiant pour les cours du professeur connecté
 export const getMoyenneCoursParEtudiantProf = async (idUtilisateur) => {
-    return await sql`
+  return await sql`
         SELECT
             u.idutilisateur,
             u.nom,
@@ -77,7 +77,7 @@ export const getMoyenneCoursParEtudiantProf = async (idUtilisateur) => {
 
 // Nombre de sujets traités par étudiant dans les cours du professeur connecté
 export const getNombreSujetsTraitesParEtudiantProf = async (idUtilisateur) => {
-    return await sql`
+  return await sql`
         SELECT
             u.idutilisateur,
             u.nom,
@@ -94,7 +94,7 @@ export const getNombreSujetsTraitesParEtudiantProf = async (idUtilisateur) => {
 
 // Nombre d'étudiants inscrits par cours du professeur connecté
 export const getNombreEtudiantsInscritsParCoursProf = async (idUtilisateur) => {
-    return await sql`
+  return await sql`
         SELECT 
             co.idcours,
             co.nomcours,
@@ -104,4 +104,70 @@ export const getNombreEtudiantsInscritsParCoursProf = async (idUtilisateur) => {
         WHERE co.idutilisateur = ${idUtilisateur}
         GROUP BY co.idcours, co.nomcours;
     `;
+};
+export const getNombreCoursEtudiant = async (idUtilisateur) => {
+  const result = await sql`
+    SELECT COUNT(*) AS nbcours
+    FROM public.suivre
+    WHERE idutilisateur = ${idUtilisateur};
+  `;
+  return result[0].nbcours;
+};
+
+export const getNombreCopieEtudiant = async (idUtilisateur) => {
+  const result = await sql`
+    SELECT COUNT(*) AS nbcopies
+    FROM public.copie
+    WHERE idutilisateur = ${idUtilisateur};
+  `;
+  return result[0].nbcopies;
+};
+
+export const getNombreSujetEtudiant = async (idUtilisateur) => {
+  const result = await sql`
+    SELECT COUNT(DISTINCT s.idsujet) AS nbsujets
+    FROM public.suivre sv
+    JOIN public.cours c ON sv.idcours = c.idcours
+    JOIN public.sujet s ON c.idcours = s.idcours
+    WHERE sv.idutilisateur = ${idUtilisateur};
+  `;
+  return result[0].nbsujets;
+};
+
+export const getMoyenneParCoursEtudiant = async (idUtilisateur) => {
+  return await sql`
+    SELECT
+      co.idcours,
+      co.nomcours,
+      AVG(c.notefinal) AS moyenne
+    FROM public.copie c
+    JOIN public.sujet s ON c.idsujet = s.idsujet
+    JOIN public.cours co ON s.idcours = co.idcours
+    WHERE c.idutilisateur = ${idUtilisateur}
+    GROUP BY co.idcours, co.nomcours;
+  `;
+};
+
+export const getMoyenneGeneraleEtudiant = async (idUtilisateur) => {
+  const result = await sql`
+    SELECT AVG(notefinal) AS moyenne_generale
+    FROM public.copie
+    WHERE idutilisateur = ${idUtilisateur};
+  `;
+  return result[0].moyenne_generale;
+};
+
+export const getTop5MeilleuresNoteEtudiant = async (idUtilisateur) => {
+  return await sql`
+    SELECT
+      c.idcopie,
+      s.idsujet,
+      s.nomsujet,
+      c.notefinal
+    FROM public.copie c
+    JOIN public.sujet s ON c.idsujet = s.idsujet
+    WHERE c.idutilisateur = ${idUtilisateur} AND c.notefinal IS NOT NULL
+    ORDER BY c.notefinal DESC
+    LIMIT 5;
+  `;
 };
