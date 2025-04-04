@@ -101,8 +101,8 @@ export default function Page() {
 	}
 
 	return (
-		<>
-			<div className="hidden h-[80vh] overflow-y-auto flex-1 px-10 flex-col p-2 md:flex">
+		<div className="max-h-[80vh] overflow-y-auto">
+			<div className="hidden h-full overflow-y-auto flex-1 px-10 flex-col p-2 md:flex">
 				<div className="flex items-center justify-between ">
 					<div>
 						<h2 className="text-4xl font-extrabold tracking-tight py-2 text-zinc-400">
@@ -125,7 +125,7 @@ export default function Page() {
 
 			<Drawer anchor="right" open={isDrawerOpen} onClose={closeDrawer}>
 				{selectedSujet && (
-					<div className="p-4 mt-2 flex w-[30vw]">
+					<div className="p-5 flex w-[30vw]">
 						{
 							<div className="flex flex-1 flex-col h-full overflow-y-hidden items-center justify-center">
 								<div className="flex w-full max-w-xl flex-col items-center justify-center bg-slate-50 p-8 text-left">
@@ -137,9 +137,13 @@ export default function Page() {
 											<PdfViewer pdfUrl={selectedSujet.urlsujet} />
 
 											<div className="grid gap-1">
-												<p className="text-base font-bold leading-none text-red-700">
+												<a
+													href={selectedSujet.urlsujet}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="text-base mt-2 bg-red-600 p-2 rounded-3xl text-white hover:bg-black font-bold leading-none cursor-pointer">
 													Cliquez pour voir
-												</p>
+												</a>
 											</div>
 										</div>
 									</div>
@@ -237,6 +241,6 @@ export default function Page() {
 					</div>
 				)}
 			</Drawer>
-		</>
+		</div>
 	);
 }

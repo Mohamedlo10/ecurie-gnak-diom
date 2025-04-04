@@ -143,7 +143,7 @@ export default function Page() {
 	}
 
 	return (
-		<>
+		<div className="max-h-[86vh] overflow-y-auto">
 			<div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
 				<div className="flex items-center justify-between ">
 					<div>
@@ -189,7 +189,7 @@ export default function Page() {
 				</div>
 
 				{filteredcours.length > 0 ? (
-					<div className="pl-12 pt-8 h-[53vh] overflow-y-auto grid grid-cols-5">
+					<div className="pl-12 pt-8 h-[50vh] overflow-y-auto grid grid-cols-5">
 						{filteredcours.map((cour: Cours) => (
 							<div
 								key={cour.idcours}
@@ -279,6 +279,6 @@ export default function Page() {
 					)}
 				</div>
 			</Drawer>
-		</>
+		</div>
 	);
 }

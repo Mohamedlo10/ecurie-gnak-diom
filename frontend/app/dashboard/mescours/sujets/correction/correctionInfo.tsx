@@ -152,6 +152,15 @@ const CorrectionInfo: React.FC<CorrectionInfoProps> = ({ sujetId }) => {
 						<div className="flex flex-col w-2/3 h-full ">
 							<div className="h-96">
 								<PdfViewer pdfUrl={correction.urlcorrection} />
+								<div className="flex gap-1 py-6 w-[90%] items-center justify-center">
+									<a
+										href={correction.urlcorrection}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-base mt-2 bg-black w-fit text-white hover:bg-zinc-400 font-bold leading-none cursor-pointer p-2 rounded-4xl">
+										Cliquez pour voir
+									</a>
+								</div>
 								<div className="flex-row flex gap-3 ">
 									<div className="text-gray-500 text-sm sm:text-base">
 										correction generer le

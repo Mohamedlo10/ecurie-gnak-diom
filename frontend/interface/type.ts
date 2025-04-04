@@ -13,52 +13,49 @@
    updatedat?: string | null; 
  }; */
 
-export type User={
-  idutilisateur:string,
-  nom: string,
-  prenom:string,
-  email:string,
-  role: string,
-  created_at:string
-}
+export type User = {
+  idutilisateur: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  role: string;
+  created_at: string;
+};
 
 export type Etudiant = User & {
   ine: string;
 };
 
-export type Cours={
-  idcours:string,
-  nom: string,
-  prenom:string,
-  email:string,
-  nomcours: string,
-  created_at:string
-}
+export type Cours = {
+  idcours: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  nomcours: string;
+  created_at: string;
+};
 
-
-
-export type Sujet={
-  idsujet: string,
-  idcours:string,
-  nomsujet:string,
-  nomcours?:string,
-  urlsujet:string,
-  created_at:string,
-  datesoumission:string
-}
+export type Sujet = {
+  idsujet: string;
+  idcours: string;
+  nomsujet: string;
+  nomcours?: string;
+  urlsujet: string;
+  created_at: string;
+  datesoumission: string;
+};
 
 export type Copie = {
   idcopie: string;
   idutilisateur: string;
   idsujet: string;
   noteia?: number | null;
-  nomsujet?:string,
+  nomsujet?: string;
   notefinal?: number | null;
   commentaire?: string | null;
   urlcopie: string;
   created_at?: string;
 };
-
 
 export type Correction = {
   idcorrection: string;
@@ -66,7 +63,6 @@ export type Correction = {
   idsujet: string;
   created_at?: string;
 };
-
 
 export type NoteSujet = {
   idsujet: string;
@@ -114,11 +110,50 @@ export type NbInscritsCours = {
   nombre_etudiants_inscrits: string;
 };
 
-export type Statistique = {
+export type StatistiqueProf = {
   notesSujets: NoteSujet[];
   nbEtudiantsParSujet: NbEtudiantsParSujet[];
   moyennesEtudiants: MoyenneEtudiant[];
   moyennesParCours: MoyenneParCours[];
   sujetsTraitesParEtudiant: SujetsTraitesParEtudiant[];
   nbInscritsCours: NbInscritsCours[];
+};
+export type BestNotes = {
+  idcopie: string;
+  idsujet: string;
+  nomsujet: string;
+  notefinal: number;
+};
+
+export type MoyennesParCours = {
+  idcours: string;
+  moyenne: string;
+  nomcours: string;
+};
+
+export type StatistiqueEtudiant = {
+  bestNotes: BestNotes[];
+  moyenneGeneral: string;
+  moyennesParCours: MoyennesParCours[];
+  nbCopie: number;
+  nbCours: number;
+  nbSujet: number;
+};
+
+export type ChatMessageType = {
+  text: string;
+  isUser: boolean;
+};
+
+export type ChatMessage = {
+  text: string;
+  isUser: boolean;
+};
+
+export type RequestData = {
+  messages: ChatMessage[];
+};
+
+export type ResponseData = {
+  message: string;
 };

@@ -118,8 +118,8 @@ export default function Page() {
 					<div className="p-4 mt-2 flex w-[30vw]">
 						{
 							<div className="flex flex-1 flex-col h-full overflow-y-hidden items-center justify-center">
-								<div className="flex w-full max-w-xl flex-col items-center justify-center bg-slate-50 p-8 text-left">
-									<div className="flex flex-row gap-2 w-full mb-4">
+								<div className="flex w-full max-w-xl flex-col items-center justify-center bg-slate-50 p-2 text-left">
+									<div className="flex flex-row gap-2 w-full ">
 										<div className="flex flex-col w-full items-center gap-2 ">
 											<div className="mb-2 text-base font-bold leading-none">
 												Copie
@@ -127,9 +127,13 @@ export default function Page() {
 											<PdfViewer pdfUrl={selectedCopie.urlcopie} />
 
 											<div className="grid gap-1">
-												<p className="text-base font-bold leading-none text-red-700">
+												<a
+													href={selectedCopie.urlcopie}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="text-base mt-2 bg-red-600 p-2 rounded-3xl text-white hover:bg-black font-bold leading-none cursor-pointer">
 													Cliquez pour voir
-												</p>
+												</a>
 											</div>
 										</div>
 									</div>
