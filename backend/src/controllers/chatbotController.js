@@ -92,7 +92,7 @@ export const chatAboutSujet = async (req, res) => {
 
 
     // Envoi de la réponse
-    res.status(200).json({ response: cleanResponse });
+    res.status(200).json({  cleanResponse });
 
   } catch (error) {
     console.error("Erreur critique :", error);
