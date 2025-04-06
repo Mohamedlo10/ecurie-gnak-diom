@@ -1,18 +1,21 @@
 import * as suivreModel from "../models/suivreModel.js";
+import * as notifController from "./notifController.js";
 
 export const addEtudiant = async (req, res) => {
     try {
         const { idcours, email } = req.body;
-        console.log(idcours, email);
+        console.log(idcours, email, "ajout etudiant au cours");
         if (!idcours || !email) {
             return res.status(400).json({ error: "Les identifiants du cours et de l'utilisateur sont requis." });
         }
 
         const newSuivre = await suivreModel.addEtudiant(idcours, email);
-
+        const user = await suivreModel.getUserByEmail(email);
+        console.log(user.email, user.idutilisateur);
+        const notif = await notifController.notifAjoutCours(user.idutilisateur, idcours);
         return res.status(201).json({
             message: "Étudiant inscrit avec succès au cours.",
-            data: newSuivre
+            data: newSuivre, cours: notif,
         });
     } catch (error) {
         return res.status(500).json({ error: error.message });

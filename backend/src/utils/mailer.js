@@ -12,8 +12,7 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendmail = async (to, subject, html) =>{
-
+export const sendMail = async (to, subject, html) =>{
   try {
     await transporter.sendMail({
       from: `"elite 🚀" <${process.env.SMTP_USER}>`,

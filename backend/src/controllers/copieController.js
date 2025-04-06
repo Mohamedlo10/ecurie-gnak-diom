@@ -4,6 +4,7 @@ import supabase from "../config/supabase.js";
 import * as copieModel from "../models/copieModel.js";
 import * as correctionModel from "../models/correctionModel.js";
 import correctionQueue from '../services/fileCorrection.js';
+import * as notifController  from "./notifController.js";
 
 
 export const addCopie = async (req, res) => {
@@ -253,11 +254,12 @@ export const updateCopie = async (req, res) => {
 
 export const confirmNoteCopie = async (req, res) => {
   try {
-      const {  notefinal} = req.body;
-    const { idcopie } = req.params;
+      const { notefinal} = req.body;
+      const { idcopie } = req.params;
       console.log(req.body);
       const updatedCopie = await copieModel.confirmNoteCopie(idcopie, notefinal);
-      res.status(200).json(updatedCopie);
+      const notification = await notifController.notifCopieCorrigee(idcopie, notefinal);
+      res.status(200).json(updatedCopie, notification);
   } catch (error) {
       res.status(500).json({ error: error.message });
   }

@@ -1,6 +1,5 @@
 import * as coursModel from "../models/coursModel.js";
 import * as professeurModel from "../models/professeurModel.js";
-
 export const createCours = async (req, res) => {
     
     try {
@@ -11,7 +10,8 @@ export const createCours = async (req, res) => {
         }
         console.log(testProfesseur);
         const cours = await coursModel.createCours(nomCours, idutilisateur);
-        res.status(201).json({ message: "Cours ajouté avec succès", data: cours });
+        console.log(notif);
+        res.status(201).json({ message: "Cours ajouté avec succès", data: coursModel});
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

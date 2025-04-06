@@ -62,6 +62,30 @@ export const confirmNoteCopie = async(idcopie,notefinal) =>{
     `)[0];
 };
 
+export const getSujetByIdCopie = async (idcopie) => {
+  try {
+    const query = await sql`
+      SELECT sujet.nomsujet
+      FROM copie
+      JOIN sujet ON copie.idsujet = sujet.idsujet
+      WHERE copie.idcopie = ${idcopie};
+    `;
+    return query[0]?.nomsujet || null; // Si aucun résultat, renvoie null
+  } catch (error) {
+    throw new Error('Erreur lors de la récupération du sujet : ' + error.message);
+  }
+};
+
+export const findUserByIdCopie = async (idcopie) => {
+    return (await sql`
+      SELECT *
+      FROM copie
+      JOIN utilisateur ON copie.idutilisateur = utilisateur.idutilisateur
+      WHERE copie.idcopie = ${idcopie};
+    `)[0]; // Si aucun résultat, renvoie null
+};
+
+
 export const deleteCopie = async (idcopie) => {
   return (await sql`
     DELETE FROM copie WHERE idcopie=${idcopie} RETURNING *;

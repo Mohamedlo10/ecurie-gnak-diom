@@ -1,5 +1,6 @@
 import supabase from "../config/supabase.js";
 import * as sujetModel from "../models/sujetModel.js";
+import * as notificationController from "./notifController.js";
 
 
 export const createSujet = async (req, res) => {
@@ -17,7 +18,8 @@ export const createSujet = async (req, res) => {
       if (error) throw error;
       const fileUrl = supabase.storage.from('sujets').getPublicUrl(fileName).data.publicUrl;
       const updatedSujet = await sujetModel.updateSujet(sujet.idsujet, fileUrl, datesoumission);
-      res.status(201).json({ data: updatedSujet });
+      const notification = await notificationController.notifAjoutSujet(idCours, nomSujet);
+      res.status(201).json({ data: updatedSujet, notification });      
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

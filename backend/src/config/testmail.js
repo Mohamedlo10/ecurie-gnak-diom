@@ -1,4 +1,4 @@
-import * as mailer from "../utils/mailler.js";
+import * as mailer from "../utils/mailer.js";
 
 
-mailer.sendmail("jallowlune8@gmail.com", "doullll 🧠", "<p>Ceci est un test</p>");
+mailer.sendMail("jallowlune8@gmail.com", "doullll 🧠", "<p>Ceci est un test</p>");
