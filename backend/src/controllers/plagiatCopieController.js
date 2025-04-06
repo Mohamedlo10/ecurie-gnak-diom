@@ -55,18 +55,15 @@ export const compareTextSets = (copie1, copie2) => {
   };
   
 export const checkPlagiat = async (idsujet) => {
-    // 1. Récupérer toutes les copies du sujet
+    
     const copies = await getAllCopieByIdSujet(idsujet);
-  
-    // 2. Extraction du texte et pré-calcul de l'ensemble des mots nettoyés pour chaque copie
     const copiesTraitees = [];
     for (const copie of copies) {
       const texte = await extraireTextFromPdf(copie.urlcopie);
       const ensembleMots = new Set(cleanText(texte));
-      copiesTraitees.push({ idcopie: copie.idcopie, texte, ensembleMots });
+      copiesTraitees.push({ ...copie, texte, ensembleMots });
     }
   
-    // 3. Comparaison optimisée de chaque paire de copies
     for (let i = 0; i < copiesTraitees.length; i++) {
       for (let j = i + 1; j < copiesTraitees.length; j++) {
         const similarite = compareTextSets(
@@ -80,27 +77,25 @@ export const checkPlagiat = async (idsujet) => {
           console.warn(
             `⚠️⚠️⚠️  Plagiat détecté entre copie ${copiesTraitees[i].idcopie} et copie ${copiesTraitees[j].idcopie} (similarité : ${similarite.toFixed(2)} %)`
           );
-          const plagiatRow = await plagiatModel.createPlagiat(similarite);
-          // plagiatRow contiendra l'objet inséré, dont plagiatRow.idplagiat
-          
-          // 2) Enregistrer la copie i
-          await plagiatCopieModel.createPlagiatCopie(
-            plagiatRow.idplagiat,
-            copiesTraitees[i].idutilisateur, // Adapter si vous avez l'id utilisateur
-            copiesTraitees[i].idsujet,       // Adapter si vous stockez l'id sujet
-            copiesTraitees[i].idcopie,
-            similarite
-          );
-        
-          // 3) Enregistrer la copie j
-          await createPlagiatCopie(
-            plagiatRow.idplagiat,
-            copiesTraitees[j].idutilisateur,
-            copiesTraitees[j].idsujet,
-            copiesTraitees[j].idcopie,
-            similarite
-          );
-          // Ici, vous pouvez ajouter le code pour enregistrer le cas en base de données.
+          const plagiatExists = await plagiatCopieModel.checkIfPlagiatExist(copiesTraitees[i].idcopie, copiesTraitees[j].idcopie);
+
+          if (!plagiatExists) {
+            
+            const plagiatRow = await plagiatModel.createPlagiat(similarite);
+            await plagiatCopieModel.createPlagiatCopie(
+              plagiatRow.idplagiat,
+              copiesTraitees[i].idutilisateur,
+              copiesTraitees[i].idsujet,
+              copiesTraitees[i].idcopie,
+              similarite,
+              copiesTraitees[j].idutilisateur,
+              copiesTraitees[j].idsujet,
+              copiesTraitees[j].idcopie,
+              similarite
+            );
+          } else {
+            console.log("Le cas de plagiat entre ces copies a déjà été enregistré.");
+          }
         }
       }
     }

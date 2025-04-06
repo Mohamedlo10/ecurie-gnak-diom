@@ -39,7 +39,7 @@ const utilisateur = {
     if (email === utilisateur.email &&utilisateur.mot_de_passe) {
       const token = jwt.sign(
         { id: utilisateur.id, role: utilisateur.role },
-        '2b744e2124e26c396be56e55d472990e79ba744c4f196160adcc1b35488b16c1a7bed28a14118a9997ad8b0744e3a565895249417a6d08378d1f74f704e2a441',  // Le secret est directement défini ici
+        process.env.SECRET_JWT,  // Le secret est directement défini ici
         { expiresIn: '1d' }
       );
       
