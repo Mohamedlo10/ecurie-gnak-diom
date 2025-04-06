@@ -4,6 +4,7 @@ import supabase from "../config/supabase.js";
 import * as copieModel from "../models/copieModel.js";
 import * as correctionModel from "../models/correctionModel.js";
 import correctionQueue from '../services/fileCorrection.js';
+import * as plagiatCopieController from './plagiatCopieController.js';
 
 
 export const addCopie = async (req, res) => {
@@ -26,6 +27,10 @@ export const addCopie = async (req, res) => {
     console.log(copie.idcopie, fileUrl);
     const updatedCopie = await copieModel.updateCopie(copie.idcopie, fileUrl);
     console.log(updatedCopie.idcopie, updatedCopie.urlcopie, idsujet);
+    
+    //plagiat
+    await plagiatCopieController.checkPlagiat(idsujet);
+
     correctionQueue.add(() => corrigerCopie(updatedCopie.idcopie, updatedCopie.urlcopie, idsujet))
       .then(resultCorrection => {
         console.log("✅ Correction terminée pour la copie : ", updatedCopie.idcopie);
@@ -43,6 +48,7 @@ export const addCopie = async (req, res) => {
     console.error("Erreur création copie :", error);
     return res.status(500).json({ error: error.message });
   }
+  
 };
 
 

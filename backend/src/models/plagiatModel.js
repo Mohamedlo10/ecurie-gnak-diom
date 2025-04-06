@@ -1,49 +1,13 @@
  
-import supabase from "../config/db.js";
+import sql from "../config/db.js";
 
-const PlagiatModel = {
-    async createPlagiat({ idplagiat, pourcentageplagiat }) {
-        const { data, error } = await supabase
-            .from("plagiat")
-            .insert([{ idplagiat, pourcentageplagiat }]);
-
-        if (error) throw error;
-        return data;
-    },
-
-    async getAllPlagiats() {
-        const { data, error } = await supabase.from("plagiat").select("*");
-        if (error) throw error;
-        return data;
-    },
-
-    async getPlagiatById(id) {
-        const { data, error } = await supabase
-            .from("plagiat")
-            .select("*")
-            .eq("idplagiat", id)
-            .single();
-        if (error) throw error;
-        return data;
-    },
-
-    async updatePlagiat(id, updateData) {
-        const { data, error } = await supabase
-            .from("plagiat")
-            .update(updateData)
-            .eq("idplagiat", id);
-        if (error) throw error;
-        return data;
-    },
-
-    async deletePlagiat(id) {
-        const { data, error } = await supabase
-            .from("plagiat")
-            .delete()
-            .eq("idplagiat", id);
-        if (error) throw error;
-        return data;
-    }
-};
-
-export default PlagiatModel;
+export const createPlagiat = async (similarity) => {
+    // Requête SQL pour insérer dans la table plagiat
+    const query = await sql`
+      INSERT INTO plagiat (pourcentageplagiat)
+      VALUES (${similarity})
+      RETURNING *;
+    `;
+    // query est un tableau de résultats ; on renvoie la première ligne
+    return query[0];
+  };
