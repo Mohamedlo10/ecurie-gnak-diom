@@ -122,9 +122,11 @@ export default function DashboardPage() {
             nbSujets={statistiqueEtu.nbSujet}
             nbCopies={statistiqueEtu.nbCopie}
           />
-          <MoyenneGeneraleComponent
-            moyenne={parseFloat(statistiqueEtu.moyenneGeneral.slice(0, 7))}
-          />
+          {
+            <MoyenneGeneraleComponent
+              moyenne={parseFloat(statistiqueEtu.moyenneGeneral?.slice(0, 7))}
+            />
+          }
           <BestNotesEtudiant bestNotes={statistiqueEtu.bestNotes} />
           <MoyenneCoursEtudiant
             moyennesParCours={statistiqueEtu.moyennesParCours}

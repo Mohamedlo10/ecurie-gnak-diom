@@ -30,8 +30,9 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function MoyenneGeneraleComponent({ moyenne }: { moyenne: number }) {
+  const moyenneValue = isNaN(moyenne) ? 0 : moyenne;
   const chartData = [
-    { browser: "chrome", visitors: moyenne, fill: "var(--color-chrome)" },
+    { browser: "chrome", visitors: moyenneValue, fill: "var(--color-chrome)" },
   ];
   const totalVisitors = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
@@ -75,7 +76,9 @@ export function MoyenneGeneraleComponent({ moyenne }: { moyenne: number }) {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {totalVisitors === 0
+                            ? "0"
+                            : totalVisitors.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
@@ -95,21 +98,21 @@ export function MoyenneGeneraleComponent({ moyenne }: { moyenne: number }) {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          {moyenne < 10
+          {moyenneValue < 10
             ? "Risque de redoubler"
-            : moyenne >= 10 && moyenne < 12
+            : moyenneValue >= 10 && moyenneValue < 12
             ? "Passable"
-            : moyenne >= 12 && moyenne < 14
-            ? "AMention : ssez bien"
-            : moyenne >= 14 && moyenne < 16
+            : moyenneValue >= 12 && moyenneValue < 14
+            ? "Mention : Assez bien"
+            : moyenneValue >= 14 && moyenneValue < 16
             ? "Mention : Bien"
-            : moyenne >= 16 && "Mention : Tres bien"}{" "}
+            : "Mention : Très bien"}{" "}
           <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
-          {moyenne < 10
+          {moyenneValue < 10
             ? "Vous devez vous ressaisir"
-            : "Continuez sur votre lance"}{" "}
+            : "Continuez sur votre lancée"}{" "}
         </div>
       </CardFooter>
     </Card>
