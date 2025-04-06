@@ -262,10 +262,10 @@ export const confirmNoteCopie = async (req, res) => {
   try {
       const { notefinal} = req.body;
       const { idcopie } = req.params;
-      console.log(req.body);
+      console.log(req.body, req.params);
       const updatedCopie = await copieModel.confirmNoteCopie(idcopie, notefinal);
       const notification = await notifController.notifCopieCorrigee(idcopie, notefinal);
-      res.status(200).json(updatedCopie, notification);
+      res.status(200).json({updatedCopie, notification});
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
