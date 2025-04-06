@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
  /*  try {
-    const session = utiliserToken();
+    const session = getSupabaseUser();
 
     if (!session) {
       console.error("Erreur d'authentification :");

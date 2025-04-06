@@ -30,7 +30,8 @@ function Sidebar() {
 	const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
 	const [isDialogOpen, setDialogOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [user, setUser] = useState<User>();
+
+	const [user, setUser] = useState<User>(getSupabaseUser());
 	let [color, setColor] = useState("#ffffff");
 	const [error, setError] = useState("");
 	const toggleSubMenu = () => {
@@ -45,7 +46,6 @@ function Sidebar() {
 		async function fetchData() {
 			setIsLoading(true);
 			try {
-				setUser(getSupabaseUser());
 			} catch (error) {
 				console.error("Error fetching user details:", error);
 			} finally {
@@ -66,6 +66,8 @@ function Sidebar() {
 		setError("");
 
 		userDeConnection();
+		localStorage.removeItem("role_user");
+		localStorage.removeItem("user_session");
 		router.push(`/`);
 		setIsLoading(false);
 	};
@@ -88,8 +90,8 @@ function Sidebar() {
 	}
 
 	return (
-		<div className="h-[100vh]">
-			<div className="flex h-[8vh] items-center border-b px-4 lg:h-22 lg:px-6">
+		<div className="h-[100vh] bg-red-700">
+			<div className="flex  items-center border-b px-4 lg:h-22 lg:px-6">
 				<div className="flex items-center gap-4 font-semibold">
 					<Package2 className="h-8 w-8 p-2 bg-white text-red-700 rounded-full" />
 					<span className="text-white font-bold">ELITE</span>

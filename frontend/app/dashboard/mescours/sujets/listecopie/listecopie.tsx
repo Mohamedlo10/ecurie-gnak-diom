@@ -147,10 +147,14 @@ const ListeCopie: React.FC<ListeCopieProps> = ({ sujetId }) => {
 											</div>
 											<PdfViewer pdfUrl={selectedCopie.urlcopie} />
 
-											<div className="grid gap-1">
-												<p className="text-base font-bold leading-none text-red-700">
+											<div className="flex gap-1 w-[90%] items-center justify-center">
+												<a
+													href={selectedCopie.urlcopie}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="text-base mt-2 bg-black w-fit text-white hover:bg-zinc-400 font-bold leading-none cursor-pointer p-2 rounded-4xl">
 													Cliquez pour voir
-												</p>
+												</a>
 											</div>
 										</div>
 									</div>

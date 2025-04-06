@@ -103,10 +103,6 @@ function Login() {
 				console.log("Connexion réussie:", data);
 
 				if (data) {
-					localStorage.setItem(
-						"user_session",
-						JSON.stringify(data.utilisateur)
-					);
 					handleNavigation();
 				} else {
 					throw new Error(data.message || "Échec de connexion.");
@@ -124,10 +120,6 @@ function Login() {
 				console.log("Réponse du backend après inscription:", data);
 
 				if (data) {
-					localStorage.setItem(
-						"user_session",
-						JSON.stringify(data.utilisateur)
-					);
 					router.push("/dashboard");
 				} else {
 					throw new Error(data.message || "Inscription échouée.");
