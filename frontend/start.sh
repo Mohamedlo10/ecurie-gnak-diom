@@ -4,4 +4,4 @@ export PATH=/var/www/elite/.nvm/versions/node/v18.20.7/bin:/usr/bin:/bin
 export NODE_ENV=production
 export PORT=3006
 
-/var/www/elite/.nvm/versions/node/v18.20.7/bin/npm run start
+/var/www/elite/.nvm/versions/node/v20.19.0/bin/npm run start
