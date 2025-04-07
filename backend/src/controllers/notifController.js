@@ -79,15 +79,22 @@ export const notifCopieCorrigee = async (idcopie, note) => {
     try {
         // const user = await utilisateurModel.findUserById(idUtilisateur);
         const user = await copieModel.findUserByIdCopie(idcopie);
+        // console.log( "objet user ");
+        // console.log(user);
+        console.log(idcopie);
         const sujet = await copieModel.getSujetByIdCopie(idcopie);
+        console.log(sujet)
+        console.log("nom Sujet :")
+        console.log(sujet.nomsujet);
         const cours = await coursModel.getCoursById(sujet.idcours);
+        console.log(user.email, user.nom, cours.nomcours, note);
 
         if (user?.email) {
             const contenuMail = (
                 user.email,
                 "📝 Votre copie a été corrigée",
                 `<p>Bonjour ${user.prenom} ${user.nom},</p>
-                <p>Votre copie pour le sujet ${sujet.nomSujet} du cours de ${cours.nomcours} a été corrigée</p>
+                <p>Votre copie pour le sujet ${sujet.nomsujet} du cours de ${cours.nomcours} a été corrigée</p>
                 <p><strong>Note :</strong> ${note}/20</p>`
             );
             console.log("Email Content:", contenuMail);  // Affiche le contenu de l'email dans la console

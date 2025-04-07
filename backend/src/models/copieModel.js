@@ -65,12 +65,12 @@ export const confirmNoteCopie = async(idcopie,notefinal) =>{
 export const getSujetByIdCopie = async (idcopie) => {
   try {
     const query = await sql`
-      SELECT sujet.nomsujet
+      SELECT *
       FROM copie
       JOIN sujet ON copie.idsujet = sujet.idsujet
       WHERE copie.idcopie = ${idcopie};
     `;
-    return query[0]?.nomsujet || null; // Si aucun résultat, renvoie null
+    return query[0] || null; // Si aucun résultat, renvoie null
   } catch (error) {
     throw new Error('Erreur lors de la récupération du sujet : ' + error.message);
   }
