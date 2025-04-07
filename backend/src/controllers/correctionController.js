@@ -65,7 +65,7 @@ export const generateCorrection = async (req, res) => {
       - Language and Tone : Use academic language suitable for [students' education level], maintaining a formal and professional tone.
     `;
 
-    const ollamaResponse = await axios.post('http://localhost:11434/api/generate', {
+    const ollamaResponse = await axios.post('http://127.0.0.1:11434/api/generate', {
       model: process.env.MODELE_IA,
       prompt: prompt,
       stream: false
@@ -139,7 +139,6 @@ export const modifierCorrection = async (req, res) => {
     const file = req.file; 
     let correction = await correctionModel.getCorrectionById(idCorrection);
     let fileUrl = correction.urlcorrection; 
-
     if (file) {
       const newFileName = `${idCorrection}.pdf`; 
       if (fileUrl && fileUrl.trim() !== "") {
@@ -147,17 +146,14 @@ export const modifierCorrection = async (req, res) => {
         const { error: removeError } = await supabase.storage
           .from('corrections')
           .remove([oldFileName]);
-
         if (removeError) {
           console.error("Erreur suppression fichier existant :", removeError);
           throw removeError; 
         }
       }
-
       const { error: uploadError } = await supabase.storage
         .from('corrections')
         .upload(newFileName, file.buffer, { contentType: file.mimetype });
-
       if (uploadError) {
         console.error("Erreur upload fichier :", uploadError);
         throw uploadError;
@@ -244,7 +240,7 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
     `;
 
     // Appel à Ollama
-    const ollamaResponse = await axios.post("http://localhost:11434/api/generate", {
+    const ollamaResponse = await axios.post("http://127.0.0.1:11434/api/generate", {
       model: process.env.MODELE_IA,
       prompt: prompt,
       stream: false

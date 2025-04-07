@@ -139,7 +139,7 @@ export const corrigerCopie = async (idcopie, urlcopie, idsujet) => {
   while (true) {
     try {
       const ollamaResponse = await axios.post(
-        "http://localhost:11434/api/generate",
+        "http://127.0.0.1:11434/api/generate",
         {
           model: process.env.MODELE_IA,
           prompt: prompt,
